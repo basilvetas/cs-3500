@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TipCalculator", "TipCalculator\TipCalculator.csproj", "{08A2287D-E580-4C76-9349-482D6C56AB07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TipCalculatorTest", "TipCalculatorTest\TipCalculatorTest.csproj", "{A2377F0F-34DF-4999-B468-D27E78B8407A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{08A2287D-E580-4C76-9349-482D6C56AB07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08A2287D-E580-4C76-9349-482D6C56AB07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08A2287D-E580-4C76-9349-482D6C56AB07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08A2287D-E580-4C76-9349-482D6C56AB07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2377F0F-34DF-4999-B468-D27E78B8407A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2377F0F-34DF-4999-B468-D27E78B8407A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2377F0F-34DF-4999-B468-D27E78B8407A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2377F0F-34DF-4999-B468-D27E78B8407A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

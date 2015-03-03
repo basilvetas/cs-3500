@@ -1,0 +1,456 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace CustomNetworking
+{
+    /// <summary>     
+    /// 
+    /// A StringSocket is a wrapper around a Socket.  It provides methods that
+    /// asynchronously read lines of text (strings terminated by newlines) and 
+    /// write strings. (As opposed to Sockets, which read and write raw bytes.)  
+    ///
+    /// StringSockets are thread safe.  This means that two or more threads may
+    /// invoke methods on a shared StringSocket without restriction.  The
+    /// StringSocket takes care of the synchonization.
+    /// 
+    /// Each StringSocket contains a Socket object that is provided by the client.  
+    /// A StringSocket will work properly only if the client refrains from calling
+    /// the contained Socket's read and write methods.
+    /// 
+    /// If we have an open Socket s, we can create a StringSocket by doing
+    /// 
+    ///    StringSocket ss = new StringSocket(s, new UTF8Encoding());
+    /// 
+    /// We can write a string to the StringSocket by doing
+    /// 
+    ///    ss.BeginSend("Hello world", callback, payload);
+    ///    
+    /// where callback is a SendCallback (see below) and payload is an arbitrary object.
+    /// This is a non-blocking, asynchronous operation.  When the StringSocket has 
+    /// successfully written the string to the underlying Socket, or failed in the 
+    /// attempt, it invokes the callback.  The parameters to the callback are a
+    /// (possibly null) Exception and the payload.  If the Exception is non-null, it is
+    /// the Exception that caused the send attempt to fail.
+    /// 
+    /// We can read a string from the StringSocket by doing
+    /// 
+    ///     ss.BeginReceive(callback, payload)
+    ///     
+    /// where callback is a ReceiveCallback (see below) and payload is an arbitrary object.
+    /// This is non-blocking, asynchronous operation.  When the StringSocket has read a
+    /// string of text terminated by a newline character from the underlying Socket, or
+    /// failed in the attempt, it invokes the callback.  The parameters to the callback are
+    /// a (possibly null) string, a (possibly null) Exception, and the payload.  Either the
+    /// string or the Exception will be non-null, but nor both.  If the string is non-null, 
+    /// it is the requested string (with the newline removed).  If the Exception is non-null, 
+    /// it is the Exception that caused the send attempt to fail.
+    /// </summary>
+
+    public class StringSocket
+    {
+        // These delegates describe the callbacks that are used for sending and receiving strings.
+        public delegate void SendCallback(Exception e, object payload);
+        public delegate void ReceiveCallback(String s, Exception e, object payload);
+
+        private Socket socket;
+        private Encoding encoding;
+        private Exception sendException;
+        private Exception receiveException;
+        
+        // The byte array representation of the string message we are sending
+        private Byte[] bytesToSend;
+        private Byte[] bytesToReceive;
+        private int bytesSent;
+        private int bytesReceived;
+
+        private Queue<SendMessage> sendQueue;
+        private Queue<ReceiveMessage> receiveQueue;
+
+        // check if message are currently sending and receiving
+        private bool isSending;
+        private bool isReceiving;
+
+        // part of a message that has been received (will be put into receivedMessages once complete)
+        private string partialMessage;
+
+        // completed messages that have been received
+        private Queue<String> receivedMessages;
+
+
+        /// <summary>
+        /// This struct contains the data in a message 'send' request. A new
+        /// SendMessage will be added to our queue each time BeginSend() is called.
+        /// </summary>
+        private struct SendMessage
+        {
+            public string message { get; set; }
+            public SendCallback callback { get; set; }
+            public object payload { get; set; }
+        }
+
+        /// <summary>
+        /// This struct contains the data in a message 'receive' request. A new
+        /// SendMessage will be added to our queue each time BeginReceive() is called.
+        /// </summary>
+        private struct ReceiveMessage
+        {            
+            public ReceiveCallback callback { get; set; }
+            public object payload { get; set; }
+        }
+
+        /// <summary>
+        /// Creates a StringSocket from a regular Socket, which should already be connected.  
+        /// The read and write methods of the regular Socket must not be called after the
+        /// LineSocket is created.  Otherwise, the StringSocket will not behave properly.  
+        /// The encoding to use to convert between raw bytes and strings is also provided.
+        /// </summary>
+        public StringSocket(Socket s, Encoding e)
+        {
+            socket = s;
+            encoding = e;
+            bytesToSend = new Byte[1];            
+            bytesToReceive = new Byte[1024]; // change to 1024 (2^10), 4096 (2^12), or 8192 (2^13) as a buffer size
+            sendQueue = new Queue<SendMessage>();
+            receiveQueue = new Queue<ReceiveMessage>();
+            sendException = null;
+            receiveException = null;
+            isSending = false;
+            isReceiving = false;
+            receivedMessages = new Queue<string>();            
+        }
+
+        /// <summary>
+        /// 
+        /// We can write a string to a StringSocket ss by doing
+        /// 
+        ///    ss.BeginSend("Hello world", callback, payload);
+        ///    
+        /// where callback is a SendCallback (see below) and payload is an arbitrary object.
+        /// This is a non-blocking, asynchronous operation.  When the StringSocket has 
+        /// successfully written the string to the underlying Socket, or failed in the 
+        /// attempt, it invokes the callback.  The parameters to the callback are a
+        /// (possibly null) Exception and the payload.  If the Exception is non-null, it is
+        /// the Exception that caused the send attempt to fail. 
+        /// 
+        /// This method is non-blocking.  This means that it does not wait until the string
+        /// has been sent before returning.  Instead, it arranges for the string to be sent
+        /// and then returns.  When the send is completed (at some time in the future), the
+        /// callback is called on another thread.
+        /// 
+        /// This method is thread safe.  This means that multiple threads can call BeginSend
+        /// on a shared socket without worrying around synchronization.  The implementation of
+        /// BeginSend must take care of synchronization instead.  On a given StringSocket, each
+        /// string arriving via a BeginSend method call must be sent (in its entirety) before
+        /// a later arriving string can be sent.
+        /// </summary>
+        public void BeginSend(String s, SendCallback callback, object payload)
+        {
+            lock (sendQueue) // lock on to the sendQueue (the lock object is arbitrary)
+            {
+                // create a new SendMessage with the data and add it to the queue
+                sendQueue.Enqueue(new SendMessage { message = s, callback = callback, payload = payload });
+
+                // if the second thread for processing send message is not running, 
+                // then start a new thread to process the messages
+                if (!isSending)
+                {
+                    isSending = true;
+                    SendNextMessage();                                
+                }                    
+            }
+        }        
+
+        /// <summary>
+        /// This is a helper method to send bytes from the socket to the server. 
+        /// </summary>
+        /// <param name="message"></param>
+        private void SendNextMessage ()
+        {           
+            // create an array of bytes from the first message in the queue
+            // based on our encoding, but don't remove the message from the queue
+            bytesToSend = encoding.GetBytes(sendQueue.Peek().message);
+
+            // counter for keeping track of how many bytes have been sent
+            bytesSent = 0;                       
+
+            // if any exceptions are caught below, set sendException equal to that exception
+            sendException = null; // reset to null for each new message
+
+            try
+            {
+                // use the socket data structure to begin sending the bytes to the server
+                socket.BeginSend(bytesToSend, bytesSent, bytesToSend.Length-1, SocketFlags.None, SendByteCallback, null);                
+            }
+            catch(ArgumentNullException e)
+            {
+                sendException = e;
+            }
+            catch(ArgumentException e)
+            {
+                sendException = e;
+            }
+            catch(SocketException e)
+            {
+                sendException = e;
+            }
+            catch(ObjectDisposedException e)
+            {
+                sendException = e;
+            }            
+        }
+
+        /// <summary>
+        /// A callback method to tell us if all the bytes have been sent from socket.BeginSend() to
+        /// the operating system. 
+        /// </summary>
+        /// <param name="ar"></param>
+        private void SendByteCallback(IAsyncResult ar)
+        {            
+            // returns the number of bytes sent in the previous instance of socket.BeginSend()
+            bytesSent += socket.EndSend(ar);
+                       
+            // compute bytes that have not yet been sent
+            int remainingBytes = bytesToSend.Length - bytesSent;
+
+            //He locks here.
+            //To get the bytes "that we attempted to send" 
+            //byte[] outgoingBuffer = (byte[])result.AsyncState;
+
+            // if all the bytes have not yet been sent, then BeginSend() again starting at new index
+            if (remainingBytes > 0) // begin to send more bytes - may need a try catch here?
+                socket.BeginSend(bytesToSend, bytesSent, remainingBytes, SocketFlags.None, SendByteCallback, null);     
+            else
+            {
+                // remove the message we just sent
+                SendMessage justSent = sendQueue.Dequeue();
+                
+                // send the SendMessage callback back to the client on a new thread
+                lock(sendQueue)
+                {
+                    ThreadPool.QueueUserWorkItem(o => justSent.callback(sendException, justSent.payload));                
+                }                
+
+                // if there are still messages in the queue
+                if(sendQueue.Count > 0)
+                    SendNextMessage();  // start sending the next message
+                else 
+                    isSending = false; // if no more message, do nothing & change boolean back to false
+            }
+        }
+
+        /// <summary>
+        /// <para>
+        /// We can read a string from the StringSocket by doing
+        /// </para>
+        /// 
+        /// <para>
+        ///     ss.BeginReceive(callback, payload)
+        /// </para>
+        /// 
+        /// <para>
+        /// where callback is a ReceiveCallback (see below) and payload is an arbitrary object.
+        /// This is non-blocking, asynchronous operation.  When the StringSocket has read a
+        /// string of text terminated by a newline character from the underlying Socket, or
+        /// failed in the attempt, it invokes the callback.  The parameters to the callback are
+        /// a (possibly null) string, a (possibly null) Exception, and the payload.  Either the
+        /// string or the Exception will be non-null, but nor both.  If the string is non-null, 
+        /// it is the requested string (with the newline removed).  If the Exception is non-null, 
+        /// it is the Exception that caused the send attempt to fail.
+        /// </para>
+        /// 
+        /// <para>
+        /// This method is non-blocking.  This means that it does not wait until a line of text
+        /// has been received before returning.  Instead, it arranges for a line to be received
+        /// and then returns.  When the line is actually received (at some time in the future), the
+        /// callback is called on another thread.
+        /// </para>
+        /// 
+        /// <para>
+        /// This method is thread safe.  This means that multiple threads can call BeginReceive
+        /// on a shared socket without worrying around synchronization.  The implementation of
+        /// BeginReceive must take care of synchronization instead.  On a given StringSocket, each
+        /// arriving line of text must be passed to callbacks in the order in which the corresponding
+        /// BeginReceive call arrived.
+        /// </para>
+        /// 
+        /// <para>
+        /// Note that it is possible for there to be incoming bytes arriving at the underlying Socket
+        /// even when there are no pending callbacks.  StringSocket implementations should refrain
+        /// from buffering an unbounded number of incoming bytes beyond what is required to service
+        /// the pending callbacks.        
+        /// </para>
+        /// 
+        /// <param name="callback"> The function to call upon receiving the data</param>
+        /// <param name="payload"> 
+        /// The payload is "remembered" so that when the callback is invoked, it can be associated
+        /// with a specific Begin Receiver....
+        /// </param>  
+        /// 
+        /// <example>
+        ///   Here is how you might use this code:
+        ///   <code>
+        ///                    client = new TcpClient("localhost", port);
+        ///                    Socket       clientSocket = client.Client;
+        ///                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+        ///                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+        /// 
+        ///   </code>
+        /// </example>
+        /// </summary>
+        /// 
+        /// 
+
+        public void BeginReceive(ReceiveCallback callback, object payload)
+        {
+            lock (receiveQueue) // lock on to the receiveQueue (the lock object is arbitrary)
+            {
+                // create a new ReceiveMessage with the data and add it to the queue
+                receiveQueue.Enqueue(new ReceiveMessage { callback = callback, payload = payload });
+
+                // if the second thread for processing receive message is not running, 
+                // then start a new thread to process the messages 
+                if (!isReceiving)
+                {
+                    isReceiving = true;
+                    ReceiveNextMessage();
+                }
+                    
+            }
+        }
+
+        /// <summary>
+        /// This is a helper method to receive bytes from the server. 
+        /// </summary>
+        /// <param name="message"></param>
+        private void ReceiveNextMessage()
+        {           
+            // counter for keeping track of how many bytes have been received
+            bytesReceived = 0; 
+
+            // if any exceptions are caught below, set sendException equal to that exception
+            receiveException = null; // reset to null for each new message
+
+            try
+            {
+                // use the socket data structure to begin receiving the byte from the server
+                socket.BeginReceive(bytesToReceive, bytesReceived, bytesToReceive.Length, SocketFlags.None, ReceiveByteCallback, null);
+            }
+            catch (ArgumentNullException e)
+            {
+                receiveException = e;
+            }
+            catch (SocketException e)
+            {
+                receiveException = e;
+            }
+            catch (ObjectDisposedException e)
+            {
+                receiveException = e;
+            }   
+            catch (ArgumentOutOfRangeException e)
+            {
+                receiveException = e;
+            }                
+        }
+
+         /// <summary>
+        /// A callback method to tell us if all the bytes have been received from socket.BeginReceive()
+        /// </summary>
+        /// <param name="ar"></param>
+        private void ReceiveByteCallback(IAsyncResult ar)
+        {
+            // returns the number of bytes received in the previous instance of socket.BeginReceive()
+            bytesReceived += socket.EndReceive(ar);               
+
+            // add the bytes we've received so far to a our partial message string                 
+            partialMessage += encoding.GetString(bytesToReceive);
+
+            int startMessageIndex = 0;
+           
+            // whilte partialMessage still has a new line
+            while(!(partialMessage.IndexOf("\n").Equals(-1)))
+            {
+                // get the index of the newline
+                int endMessageIndex = partialMessage.IndexOf("\n");
+
+                // get the completed message and add it to queue
+                receivedMessages.Enqueue(partialMessage.Substring(startMessageIndex, endMessageIndex));
+
+                // advance our starting index and remove the message we just found from partialMessage
+                startMessageIndex = endMessageIndex + 2;
+                partialMessage = partialMessage.Substring(startMessageIndex);
+            }
+            
+
+            // split the partial message into all complete messages
+            //string[] completeMessages = partialMessage.Split(new string[] {"\n"}, 128, StringSplitOptions.None);                        
+
+            // if the last two chars in partialMessage are not \n then we know the 
+            // last segment is an incomplete message, so put it in partialMessage
+            //if (!(partialMessage.Substring(partialMessage.Length - 2).Equals("\n")))
+            //{
+            //    partialMessage = completeMessages[completeMessages.Length - 1];
+            //    completeMessages.SetValue(null, completeMessages.Length - 1);
+            //}
+            //else // otherwise we know we want to start a new empty string message
+            //    partialMessage = "";
+
+            //if (ReferenceEquals(completeMessages, null))
+            //    ReceiveNextMessage();
+
+            // then loop through and add all our message to our queue
+            //foreach (string s in completeMessages)            
+            //    receivedMessages.Enqueue(s);
+
+            // should this be a while loop?
+            if (receiveQueue.Count > 0) // if there are pending message requests
+            {
+                if (receivedMessages.Count > 0) // and if we have a message to send
+                {
+                    ReceiveMessage justReceived = receiveQueue.Dequeue(); // get the request at top of queue
+                    string message = receivedMessages.Dequeue();    // get the message at top of queue
+
+                    // send the ReceiveMessage callback back to the client on a new thread
+                    lock(receiveQueue)
+                    {
+                        ThreadPool.QueueUserWorkItem(o => justReceived.callback(message, receiveException, justReceived.payload));
+                    }                        
+                }               
+            }
+            
+            // use the socket data structure to begin receiving the byte from the server
+            if (receiveQueue.Count > 0)
+                ReceiveNextMessage();
+            else
+                isReceiving = false;
+
+            // figure out where \n is (REGEX?)
+            // when we get a complete message, add it to receivedQueue
+            // call ReceiveNextMessage
+
+            // maybe we need to call BeginReceive again here somewhere?
+        }
+
+        /// <summary>
+        /// Calling the close method will close the String Socket (and the underlying
+        /// standard socket).  The close method  should make sure all 
+        ///
+        /// Note: ideally the close method should make sure all pending data is sent
+        ///       
+        /// Note: closing the socket should discard any remaining messages and       
+        ///       disable receiving new messages
+        /// 
+        /// Note: Make sure to shutdown the socket before closing it.
+        ///
+        /// Note: the socket should not be used after closing.
+        /// </summary>
+        public void Close()
+        {
+            // look up api for sockets, check how to release all resources
+        }
+    }
+ }

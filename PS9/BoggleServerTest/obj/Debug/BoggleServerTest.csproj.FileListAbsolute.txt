@@ -1,0 +1,9 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\BoggleServerTest.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\BoggleServerTest.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\BoggleServer.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\StringSocketOfficial.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\BoggleServer.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\bin\Debug\BoggleServer.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\obj\Debug\BoggleServerTest.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\obj\Debug\BoggleServerTest.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServerTest\obj\Debug\BoggleServerTest.pdb

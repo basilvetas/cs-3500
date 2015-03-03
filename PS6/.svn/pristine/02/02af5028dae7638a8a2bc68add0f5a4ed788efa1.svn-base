@@ -1,0 +1,139 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using SS;
+using System.Text.RegularExpressions;
+
+
+namespace SpreadsheetGUI
+{
+    /// <summary>
+    /// This is a partial class for a spreadsheet Windows Forms Application
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>November 1, 2014</date>
+    public partial class SpreadsheetForm : Form
+    {
+        // Each spreadsheet form will contain a private spreadsheet object
+        private Spreadsheet spreadsheet;
+
+
+        /// <summary>
+        /// Constructor that creates a new spreadsheet form
+        /// </summary>
+        public SpreadsheetForm()
+        {
+            InitializeComponent();
+
+            // default constructor for a new spreadsheet 
+            spreadsheet = new Spreadsheet(IsValidName, s => s.ToUpper(), "ps6");
+
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += updateSelection;
+        }
+
+        /// <summary>
+        /// Constructor that loads a spreadsheet form from a saved spreadsheet file
+        /// </summary>
+        /// <param name="filepath">Filepath where the spreadsheet is saved</param>
+        public SpreadsheetForm(String filepath)
+        {
+            InitializeComponent();            
+
+            // loads a spreadsheet from a file
+            spreadsheet = new Spreadsheet(filepath, IsValidName, s => s.ToUpper(), "ps6");
+            
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += updateSelection;
+        }
+
+        /// <summary>
+        /// Private helper method to check if the name of a cell is valid or not
+        /// </summary>
+        /// <param name="name"></param>
+        private Boolean IsValidName(String name)
+        {            
+            // if it is a valid cell name return true, else return false            
+            if (Regex.IsMatch(name, @"^[a-zA-Z]+[\d]+$"))
+                return true;
+            else return false;
+        }
+        
+        /// <summary>
+        /// Helper method to get the name of the selected cell
+        /// </summary>
+        /// <returns>The name of the selected cell</returns>
+        private String GetCellName()
+        {
+            int col, row;
+            spreadsheetPanel1.GetSelection(out col, out row);
+
+            // since 'A' = 01000001 in binary, and col counts from 0 (0000), 1 (0001), 2 (0010)...
+            // then if we keep adding the next number to A the binary addition takes us from A-Z
+            char cellCol = (char)(col + 'A');            
+            // for rows we want to start a 1 instead of 0 so add 1 to each term
+            int cellRow = row + 1;
+            return "" + cellCol + cellRow;            
+        }
+
+        /// <summary>
+        /// Helper method to get the value of the selected cell
+        /// </summary>
+        /// <returns>The value of the selected cell</returns>
+        private String GetCellValue()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Helper method to get the contents of the selected cell
+        /// </summary>
+        /// <returns>The contents of the selected cell</returns>
+        private String GetCellContents()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Updates the spreadsheet text boxes
+        /// </summary>
+        private void UpdateSpreadsheet()
+        {
+            // get the name of the current cell
+            String cellName = GetCellName();            
+
+            // set the contents of the textbox equal to that cell name
+            
+            cellNameBox.Text = cellName;            
+        }
+
+        /// <summary>
+        /// From PS6 Skeleton Demo - for when cells are clicked
+        /// </summary>
+        /// <param name="ss"></param>
+        private void updateSelection(SpreadsheetPanel ss)
+        {
+            UpdateSpreadsheet();       
+        }
+        
+
+
+
+
+
+
+
+    }
+}

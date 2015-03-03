@@ -1,0 +1,423 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SpreadsheetUtilities;
+using System.Collections.Generic;
+
+namespace FormulaTester
+{
+    /// <summary>
+    /// Comment 
+    ///
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>September 23rd 2014</date>
+    [TestClass()]
+    public class FormulaTester
+    {
+
+        // --------------------- Tests ------------------------- //
+
+        /// <summary>
+        /// This test evaluates whether the Formula class returns 2.0 when given 1 + 1
+        /// </summary>
+        [TestMethod()]
+        public void Test1()
+        {
+            Formula formula_tester = new Formula("1 + 1");
+            Formula formula_two = new Formula("1.0 + 1.00");            
+            object result = formula_tester.Evaluate(null);
+            Assert.AreEqual(formula_tester, formula_two);
+            Assert.AreEqual(2.0, result); 
+
+            //System.Diagnostics.Debug.WriteLine("Hello");
+        }
+
+        /// <summary>
+        /// Tests that a simple formula with variables works. Also checks that
+        /// the loopup delegate is implemented properly. 
+        /// </summary>
+        [TestMethod()]
+        public void Test2()
+        {
+            Formula formula_tester = new Formula("A1 + a1");
+            object result = formula_tester.Evaluate(x => 1);
+            Assert.AreEqual(2.0, result); 
+        }
+
+        /// <summary>
+        /// Tests the ToString method and also that the normalizer works
+        /// </summary>
+        [TestMethod()]
+        public void Test3()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => x.ToUpper(), x => true);
+            string formula = formula_tester.ToString();
+            Assert.AreEqual("A1+A1", formula); 
+        }
+
+        /// <summary>
+        /// Tests GetHashCode method
+        /// </summary>
+        [TestMethod()]
+        public void Test4()
+        {
+            Formula formula_tester = new Formula("A1 + a1");
+            string hash = "A1+a1";
+            int code = hash.GetHashCode();
+            int formula_code = formula_tester.GetHashCode();
+            Assert.AreEqual(code, formula_code); 
+        }
+
+        /// <summary>
+        /// Tests GetHashCode method with normalize function
+        /// </summary>
+        [TestMethod()]
+        public void Test5()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => x.ToUpper(), x => true);
+            string hash = "A1+A1";
+            int code = hash.GetHashCode();
+            int formula_code = formula_tester.GetHashCode();
+            Assert.AreEqual(code, formula_code); 
+        }
+
+        /// <summary>
+        /// Tests the Equal method on two equal formulas
+        /// </summary>
+        [TestMethod()]
+        public void Test6()
+        {
+            Formula f_one = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Formula f_two = new Formula("a1 + B1 - 2.0 * 5.00", x => x.ToUpper(), x => true);
+            Assert.IsTrue(f_one.Equals(f_two));
+        }
+
+        /// <summary>
+        /// Tests for divide by zero
+        /// </summary>
+        [TestMethod()]
+        public void Test7()
+        {
+            Formula f = new Formula("(_6 / (3 - 3))", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 6);
+            Assert.IsTrue(result is FormulaError);
+        }
+
+        /// <summary>
+        /// Tests the Equal method on two unequal formulas
+        /// </summary>
+        [TestMethod()]
+        public void Test8()
+        {
+            Formula f_one = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Formula f_two = new Formula("a1 + b1 * 5.00", x => x.ToUpper(), x => true);
+            Assert.IsFalse(f_one.Equals(f_two));
+        }
+
+        /// <summary>
+        /// Tests the Equal method on two unequal formulas
+        /// </summary>
+        [TestMethod()]
+        public void Test9()
+        {
+            Formula f_one = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Formula f_two = new Formula("a1 + b1 * 5.00 - 2", x => x.ToUpper(), x => true);
+            Assert.IsFalse(f_one.Equals(f_two));
+        }
+
+        /// <summary>
+        /// Tests the Equal method on two unequal formulas
+        /// </summary>
+        [TestMethod()]
+        public void Test10()
+        {
+            Formula formula_tester = new Formula("_1 + _2");
+            object result = formula_tester.Evaluate(x => 1);
+            Assert.AreEqual(2.0, result); 
+        }        
+
+        /// <summary>
+        /// Tests the == operator on second null formula
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test13()
+        {            
+            Formula f_two = new Formula(null, x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Test for valid variable form
+        /// </summary>
+        [TestMethod()]
+        public void Test14()
+        {
+            Formula f = new Formula("A1 + _4 + R + _ + ______ + AAAAAAA + _325235 + A_3_A + _A32A", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 1);
+            Assert.AreEqual(9.0, result);
+        }
+
+        /// <summary>
+        /// Test for invalid variable form at the beginning
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test15()
+        {
+            Formula f = new Formula("1A_AJFH + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests the == operator on both null formula
+        /// </summary>
+        [TestMethod()]
+        public void Test16()
+        {
+            Formula f_one = null;
+            Formula f_two = null;
+            Boolean result = f_one == f_two; 
+            Assert.IsTrue(result);
+        }
+
+        /// <summary>
+        /// Tests the == operator on second null formula
+        /// </summary>
+        [TestMethod()]
+        public void Test17()
+        {
+            Formula f_one = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Formula f_two = null;
+            Boolean result = f_one == f_two;
+            Assert.IsFalse(result);
+        }
+
+        /// <summary>
+        /// Tests the == operator on first null formula
+        /// </summary>
+        [TestMethod()]
+        public void Test18()
+        {
+            Formula f_one = null;
+            Formula f_two = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Boolean result = f_one == f_two;
+            Assert.IsFalse(result);
+        }
+
+        /// <summary>
+        /// Tests the == operator on first null formula
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test19()
+        {
+            Formula f = new Formula("", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for unequal parens
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test20()
+        {
+            Formula f = new Formula("(1 + 2))", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for unequal parens
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test21()
+        {
+            Formula f = new Formula("((((1 + 2))", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for weird formats
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test22()
+        {
+            Formula f = new Formula("( + ( * 1((1 + 2))", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for invalid variable coming at the end
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test23()
+        {
+            Formula f = new Formula("A1 + ABC + 7SDLFJ))", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for invalid variable coming in the middle
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test24()
+        {
+            Formula f = new Formula("A1 + 7SDLFJ + _34))", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for basic arithmetic
+        /// </summary>
+        [TestMethod()]
+        public void Test25()
+        {
+            Formula f = new Formula("(A1 * 2)", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 6);
+            Assert.AreEqual(12.0, result);
+        }
+
+        /// <summary>
+        /// Tests for basic arithmetic
+        /// </summary>
+        [TestMethod()]
+        public void Test26()
+        {
+            Formula f = new Formula("(_6 / 3)", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 6);
+            Assert.AreEqual(2.0, result);
+        }
+
+        /// <summary>
+        /// Tests for divide by zero
+        /// </summary>
+        [TestMethod()]
+        public void Test27()
+        {   
+            Formula f = new Formula("(_6 / 0)", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 6);
+            Assert.IsTrue(result is FormulaError);
+        }
+
+        /// <summary>
+        /// Tests for mismatched types
+        /// </summary>
+        [TestMethod()]
+        public void Test28()
+        {
+            Formula f = new Formula("(5 + A1)", x => x.ToUpper(), x => true);
+            String s = "hi";
+            Boolean result = f.Equals(s);
+            Assert.IsFalse(result);            
+        }
+
+        /// <summary>
+        /// Tests for long arithmetic
+        /// </summary>
+        [TestMethod()]
+        public void Test11()
+        {
+            Formula f = new Formula("(1 + A1) * A1 / B3 - (1 * 1) / ((1 + 1) - 1) * (d3 + (_d - 1))", x => x.ToUpper(), x => true);
+            object result = f.Evaluate(x => 1);
+            Assert.AreEqual(1.0, result);
+        }
+
+        /// <summary>
+        /// Tests for bad syntax
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test12()
+        {
+            Formula f = new Formula(")(5 + A1)", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for bad syntax
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test29()
+        {
+            Formula f = new Formula("(5 + A1)(", x => x.ToUpper(), x => true);
+        }
+
+        /// <summary>
+        /// Tests for bad syntax
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test30()
+        {
+            Formula f = new Formula("(5 + $$$ )( )( A1)(", x => x.ToUpper(), x => true);
+        }
+
+
+        /// <summary>
+        /// Tests for lookup  
+        /// </summary>
+        [TestMethod()]
+        public void Test31()
+        {
+            Formula formula_tester = new Formula("A1 + a1");
+            object result = formula_tester.Evaluate(x => 5*5);
+            Assert.AreEqual(50.0, result);
+        }
+
+        /// <summary>
+        /// Tests for bad normalize
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test32()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => "7", x => true);
+        }
+
+        /// <summary>
+        /// Tests for bad isvalid
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test33()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => x, x => false);
+        }
+
+        /// <summary>
+        /// Tests for bad format
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test34()
+        {
+            Formula formula_tester = new Formula("A1 + 1A + A1", x => x, x => true);
+        }
+
+        /// <summary>
+        /// Tests the != operator 
+        /// </summary>
+        [TestMethod()]
+        public void Test35()
+        {
+            Formula f_one = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true); ;
+            Formula f_two = new Formula("A1 + b1 - 2 * 5.0", x => x.ToUpper(), x => true);
+            Boolean result = f_one != f_two;
+            Assert.IsFalse(result);
+        }
+
+         /// <summary>
+        /// Tests the GetVariables method 
+        /// </summary>
+        [TestMethod()]
+        public void Test36()
+        {
+            Formula f = new Formula("x+Y*z", s => s.ToUpper(), s => true);
+            Formula g = new Formula("x+z", s => s.ToUpper(), s => true);
+            List<String> a = new List<String>(f.GetVariables());
+            List<String> b = new List<String>(g.GetVariables());
+            Assert.AreEqual(a.ToString(),b.ToString());
+        }
+
+        
+
+        // still need to test GetVariables
+    }
+}

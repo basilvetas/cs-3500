@@ -1,0 +1,55 @@
+3. Describe the private member variables/properties that you will be using to support the operation of BeginSend 
+in your StringSocket class.
+
+private Socket object and private Encoding object.
+
+4. Describe the private member variables/properties that you will be using to support the operation of 
+BeginReceive in your StringSocket class.
+
+private Socket object and private Encoding object.
+
+5. Let s be a StringSocket.  Suppose that it the following three calls happen in quick succession from 
+different threads:
+
+s.BeginSend(string1, callback1, payload1);
+s.BeginSend(string2, callback2, payload2);
+s.BeginSend(string3, callback3, payload3);
+
+Explain how your implementation will avoid intermingling the bytes of string1, string2, and string3 as 
+they are being transmitted, and how it will decide when to invoke callback1, callback2, and callback3.
+
+6. Let s be a StringSocket.  Suppose that it the following three calls happen in quick succession from 
+different threads:
+
+s.BeginReceive(callback1, payload1);
+s.BeginReceive(callback2, payload2);
+s.BeginReceive(callback3, payload3);
+
+Explain how your implementation will decide how and when to invoke callback1, callback2, and callback3.
+
+7. Let s be a StringSocket.  Suppose that it the following two calls happen simultaneously on two 
+different threads:
+
+s.BeginSend(string1, callback1, payload1);
+s.BeginSend(string2, callback2, payload2);
+
+Explain how your implementation will prevent the two calls from interfering with each other.
+
+Let s be a StringSocket.  Suppose that after the following call happens, a large number of bytes 
+containing multiple newline characters arrive on the underlying socket.
+
+s.BeginReceive(callback1, payload1);
+
+Explain how your implementation will cope with the extra bytes.
+
+
+
+
+
+---------------------- Implementation Notes --------------------
+
+Name: Basil Vetas & Lance Petersen
+Date: 11/8/14
+
+If we already have a try/catch block in the SentBytes method do we need it in the SendComplete method since
+it is kind of recursive??

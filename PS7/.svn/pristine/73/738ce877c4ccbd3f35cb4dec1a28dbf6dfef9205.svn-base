@@ -1,0 +1,2485 @@
+﻿using CustomNetworking;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Text;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+namespace StringSocketTester
+{
+
+
+    /// <summary>
+    ///This is a test class for StringSocketTest and is intended
+    ///to contain all StringSocketTest Unit Tests 
+    ///</summary>
+    [TestClass()]
+    public class StringSocketTest
+    {
+
+
+        private TestContext testContextInstance;
+
+        /// <summary>
+        ///Gets or sets the test context which provides
+        ///information about and functionality for the current test run.
+        ///</summary>
+        public TestContext TestContext
+        {
+            get
+            {
+                return testContextInstance;
+            }
+            set
+            {
+                testContextInstance = value;
+            }
+        }
+
+        #region Additional test attributes
+        // 
+        //You can use the following additional attributes as you write your tests:
+        //
+        //Use ClassInitialize to run code before running the first test in the class
+        //[ClassInitialize()]
+        //public static void MyClassInitialize(TestContext testContext)
+        //{
+        //}
+        //
+        //Use ClassCleanup to run code after all tests in a class have run
+        //[ClassCleanup()]
+        //public static void MyClassCleanup()
+        //{
+        //}
+        //
+        //Use TestInitialize to run code before running each test
+        //[TestInitialize()]
+        //public void MyTestInitialize()
+        //{
+        //}
+        //
+        //Use TestCleanup to run code after each test has run
+        //[TestCleanup()]
+        //public void MyTestCleanup()
+        //{
+        //}
+        //
+        #endregion
+
+
+        /// <summary>
+        ///A simple test for BeginSend and BeginReceive
+        ///</summary>
+        [TestMethod()]
+        public void Test1()
+        {
+            new Test1Class().run(4001);
+        }
+
+        public class Test1Class
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private String s1;
+            private object p1;
+            private String s2;
+            private object p2;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+
+                    // Make two receive requests
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+                    receiveSocket.BeginReceive(CompletedReceive2, 2);
+
+                    // Now send the data.  Hope those receive requests didn't block!
+                    String msg = "Hello world\nThis is a test\n";
+                    foreach (char c in msg)
+                    {
+                        sendSocket.BeginSend(c.ToString(), (e, o) => { }, null);
+                    }
+
+                    // Make sure the lines were received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("Hello world", s1);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual("This is a test", s2);
+                    Assert.AreEqual(2, p2);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request.  We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            // This is the callback for the second receive request.
+            private void CompletedReceive2(String s, Exception o, object payload)
+            {
+                s2 = s;
+                p2 = payload;
+                mre2.Set();
+            }
+        }
+
+        /// <summary>
+        ///A simple test for BeginSend 
+        ///</summary>
+        [TestMethod()]
+        public void Test2()
+        {
+            new Test2Class().run(4001);
+        }
+
+        /// <summary>
+        /// This test is only for the BeginSend() method and tests whether or not
+        /// the callback is send after the message is comletely sent. This is done by keeping
+        /// a counter variable that is incremented when the callback is called.  So if your
+        /// BeginSend() did not send a complete message and the callback does not get called,
+        /// then the counter will not be incremented and the test will fail.
+        /// 
+        /// Currently the method only calls BeginSend() once, but if you change the messagesSent
+        /// variable, it will increase the number of times we loop through and call BeginSend(), 
+        /// and this should be equal to the number of times callback is called, and therefore
+        /// equal to the number of times counter is incremented. In short, if you want to change
+        /// messagesSend to numbers greater than 1, the test should still pass. 
+        /// 
+        /// </summary>
+        public class Test2Class
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre;
+
+            // Used in Assert
+            int counter = 0;
+
+            // Used in Asser and in loop - if you change this the test should still pass
+            int messagesSent = 10;
+
+            public void run(int port)
+            {
+
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());                    
+
+                    // Now send the data.  Hope those receive requests didn't block!
+                    String msg = "Hello World\nThis is a Test\n";
+
+                    // BeginSend() as many times as messagesSent
+                    for (int i = 0; i < messagesSent; i++)
+                        sendSocket.BeginSend(msg, Test2Callback, 1);
+                    
+                    System.Threading.Thread.Sleep(500);
+                    Assert.AreEqual(messagesSent, counter);                    
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+
+            }
+
+            /// <summary>
+            /// Callback increments the counter
+            /// </summary>
+            /// <param name="s"></param>
+            /// <param name="o"></param>
+            /// <param name="payload"></param>
+            private void Test2Callback(Exception o, object payload)
+            {
+                counter++;                
+            }
+        }
+
+        /// <author>Nathan Rollins</author>
+        /// <summary>
+        /// 
+        /// Creates a server which implements a StringSocket object.
+        /// Any strings received by this server will be slightly altered  
+        /// and automatically sent back to the sender.
+        /// 
+        /// ServerTestApp and ClientTestApp are heavily adapted from Joe Zachary's 
+        /// Simple Chat Server implementation, which was edited by H. James de St. Germain.
+        /// </summary>
+        public class ServerTestApp
+        {
+            /// <summary>
+            /// The TCP listener which enables us to hear the client's connection attempts.
+            /// </summary>
+            private TcpListener myTcpListener;
+
+            /// <summary>
+            /// Constructor for the ServerTestApp class. Initializes the TCP listener 
+            /// to accept connections from any IP address and port 4321. Starts listening
+            /// and begins accepting socket connection attempts.
+            /// </summary>
+            public ServerTestApp()
+            {
+                // Create the TCP listener to let any IP connect on the port 4321
+                myTcpListener = new TcpListener(IPAddress.Any, 4321);
+
+                // Start listening and and accepting socket connection requests.
+                myTcpListener.Start();
+                myTcpListener.BeginAcceptSocket(ConnectionRequested, null);
+            }
+
+            /// <summary>
+            /// Callback called when BeginAcceptSocket completes. Creates the socket 
+            /// and begins waiting for new connection attempts.
+            /// </summary>
+            /// <param name="result"></param>
+            private void ConnectionRequested(IAsyncResult result)
+            {
+                // Create a socket to communicate with the client who is requesting it.
+                Socket socket = myTcpListener.EndAcceptSocket(result);
+
+                // Create a ClientCommunicator instance to manage the sends and receives.
+                new ClientCommunicator(socket);
+            }
+
+            /// <summary>
+            /// Manages client interactions once a socket has been created. This specific 
+            /// implementation creates a StringSocket from the passed connected socket, 
+            /// and uses it to easily repeat clients' messages back to them (though slightly
+            /// altered).
+            /// </summary>
+            public class ClientCommunicator
+            {
+                /// <summary>
+                /// The StringSocket enabling us to easily send and receive strings to and from
+                /// the client. 
+                /// </summary>
+                StringSocket serverSocket;
+
+                /// <summary>
+                /// The constructor. Converts the passed socket into a StringSocket and begins 
+                /// listening for data being sent to it.
+                /// </summary>
+                /// <param name="socket"></param>
+                public ClientCommunicator(Socket socket)
+                {
+                    // Convert the socket into a StringSocket.
+                    serverSocket = new StringSocket(socket, new System.Text.UTF8Encoding());
+
+                    // Start listening for data.
+                    serverSocket.BeginReceive(StringReceived, null);
+                }
+
+                /// <summary>
+                /// Callback called when data is received. Slightly alters the received message, 
+                /// and returns it to the sender.
+                /// </summary>
+                /// <param name="receivedString"></param>
+                /// <param name="exceptionReturned"></param>
+                /// <param name="payload"></param>
+                private void StringReceived(string receivedString,
+                    Exception exceptionReturned, object payload)
+                {
+                    // Send a slightly altered version of the received string back to the sender.
+                    // Must include a newline character to terminate the message.
+                    serverSocket.BeginSend("I'm not your " + receivedString + "\n", null, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a client which implements a StringSocket object. Stores the last 
+        /// message received from its server in the lastStringReceived variable. Messages
+        /// may be sent to the server by calling the SendMessage() method.
+        /// 
+        /// ServerTestApp and ClientTestApp are heavily adapted from Joe Zachary's 
+        /// Simple Chat Server implementation, which was edited by H. James de St. Germain.
+        /// </summary>
+        public class ClientTestApp
+        {
+            /// <summary>
+            /// Stores the last string received from the server. Will be used by the test to 
+            /// ensure proper functionality.
+            /// </summary>
+            public string lastStringReceived;
+
+            /// <summary>
+            /// The StringSocket enabling us to easily send and receive strings to and from
+            /// the server. 
+            /// </summary>
+            private StringSocket clientSocket;
+
+            /// <summary>
+            /// The socket which will be built into a StringSocket.
+            /// </summary>
+            private Socket socket;
+
+            /// <summary>
+            /// The constructor. Connects to a server hosted on the local machine through port 4321. 
+            /// Once a connection is established, control is transferred to ConnectionEstablished().
+            /// </summary>
+            public ClientTestApp()
+            {
+                // Connect to the localhost on port 4321.
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket.BeginConnect(IPAddress.Loopback, 4321, ConnectionEstablished, null);
+            }
+
+            /// <summary>
+            /// Callback called when a connection is established. Creates the socket and converts 
+            /// it into a StringSocket, then starts listening for data being sent to it.
+            /// </summary>
+            /// <param name="result"></param>
+            private void ConnectionEstablished(IAsyncResult result)
+            {
+                // Convert the socket into a StringSocket.
+                clientSocket = new StringSocket(socket, new UTF8Encoding());
+
+                // Start receiving any incoming data.
+                clientSocket.BeginReceive(StringReceived, null);
+            }
+
+            /// <summary>
+            /// Callback called when string data has been received from the server. 
+            /// This test implementation simply stores the received string in the 
+            /// lastStringReceived variable.
+            /// </summary>
+            /// <param name="receivedString"></param>
+            /// <param name="exceptionReturned"></param>
+            /// <param name="payload"></param>
+            private void StringReceived(string receivedString, Exception exceptionReturned, object payload)
+            {
+                // Store the received string.
+                lastStringReceived = receivedString;
+            }
+
+            /// <summary>
+            /// Allows a string to be sent to the server through this client's StringSocket.
+            /// </summary>
+            /// <param name="messageToSend"></param>
+            public void SendMessage(string messageToSend)
+            {
+                // Send the message requested.
+                clientSocket.BeginSend(messageToSend, null, null);
+            }
+        }
+
+        /// <author>Nathan Rollins</author>
+        /// <timecreated>11/8/2014</timecreated>
+        /// <summary>
+        /// Creates a server and a client from the custom ServerTestApp and ClientTestApp classes. 
+        /// The client sends a message to the server, and the server alters that message to provide 
+        /// the expected response.
+        /// 
+        /// ServerTestApp and ClientTestApp are heavily adapted from Joe Zachary's 
+        /// Simple Chat Server implementation, which was edited by H. James de St. Germain.
+        /// </summary>
+        [TestMethod]
+        public void SimpleClientSendServerReceiveTest() // (I like to call it "Lost at the Zoo")
+        {
+            // Create the server. Its constructor automatically starts listening.
+            new ServerTestApp();
+
+            // Create the client and give it some time to connect.
+            ClientTestApp testClient = new ClientTestApp();
+            Thread.Sleep(1000);
+
+            // Send a message from the client to the server, and give it time to respond.
+            testClient.SendMessage("daddy!\n");
+            Thread.Sleep(1000);
+
+            // Assert the proper response from the server.
+            Assert.AreEqual("I'm not your daddy!", testClient.lastStringReceived);
+        }
+
+        /// <summary>
+        /// Authors: Greg Smith and Jase Bleazard
+        /// Attempts sending the newline character by itself. The sockets should
+        /// still send and receive a blank String, "".
+        /// </summary>
+        [TestMethod()]
+        public void SendAndReceiveEmpty()
+        {
+            new SendAndReceiveEmptyClass().run(4006);
+        }
+
+        public class SendAndReceiveEmptyClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private String s1;
+            private object p1;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+
+                    // Make two receive requests
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+
+                    // Now send the data.  Hope those receive requests didn't block!
+                    sendSocket.BeginSend("\n", (e, o) => { }, null);
+
+                    // Make sure the lines were received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("", s1);
+
+                    Assert.AreEqual(1, p1);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request.  We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+        }
+
+        /// <author>Daniel James</author>
+        /// <timecreated>11/08/14</timecreated>
+        /// <summary>
+        /// Tests to make sure that code in callbacks can not cause the StringSocket to get blocked.
+        /// </summary>
+        [TestMethod()]
+        public void TestBlockingCallback()
+        {
+            // Declare these here so we can properally clean up.
+            TcpListener server = null;
+            TcpClient client = null;
+            StringSocket sendSocket = null;
+            StringSocket receiveSocket = null;
+
+            // Test both receive callback and send callback separately.
+            ManualResetEvent mreReceive = new ManualResetEvent(false);
+            ManualResetEvent mreSend = new ManualResetEvent(false);
+
+            // So we can unblock threads in finally.
+            ManualResetEvent mreBlock = new ManualResetEvent(false);
+
+            // Some constants used in the test case
+            const int timeout = 2000;
+            const int port = 8989;
+
+            try
+            {
+                // Create server/client
+                server = new TcpListener(IPAddress.Any, port);
+                server.Start();
+                client = new TcpClient("localhost", port);
+
+                // Wrap the two ends of the connection into StringSockets
+                sendSocket = new StringSocket(server.AcceptSocket(), new UTF8Encoding());
+                receiveSocket = new StringSocket(client.Client, new UTF8Encoding());
+
+                // Make two receive requests
+                receiveSocket.BeginReceive((s, e, p) => mreBlock.WaitOne(), 1); // This one attempts to block StringSocket
+                receiveSocket.BeginReceive((s, e, p) => mreReceive.Set(), 2); // This one allows assertion to pass. (Won't happen if StringSocket is blocked from the first request.)
+
+                // Make two send requests.
+                sendSocket.BeginSend("Don't let my code\n", (e, p) => mreBlock.WaitOne(), null); // This one attempts to block StringSocket
+                sendSocket.BeginSend("block your code\n", (e, p) => mreSend.Set(), null); // This one allows assertion to pass. (Won't happen if StringSocket is blocked from the first request.)
+
+                // Make sure the second requests were able to go through.
+                Assert.AreEqual(true, mreSend.WaitOne(timeout), "Blocked by BeginSend callback.");
+                Assert.AreEqual(true, mreReceive.WaitOne(timeout), "Blocked by BeginReceive callback.");
+            }
+            finally
+            {
+                // Cleanup
+                mreBlock.Set();
+                sendSocket.Close();
+                receiveSocket.Close();
+                server.Stop();
+                client.Close();
+            }
+        }
+
+        ///<author>Travis Healey</author>
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestMethod()]
+        public void Test1_Mod()
+        {
+            for (int i = 0; i < 100; i++)
+                new Test1Class().run(4002);
+
+        }
+
+        /// <author>Matthew Madden</author>
+        /// <timecreated>11/11/14</timecreated>
+        /// <summary>
+        /// This method tests whether non-ASCII (multi-byte) characters are
+        /// passed through the String Socket intact, based on the encoding provided.
+        /// UTF-8 encoding can encode/decode any valid Unicode character.
+        ///</summary>
+        [TestMethod()]
+        public void Test_non_ASCII()
+        {
+            new TestClass_non_ASCII().run(4100);
+        }
+
+        public class TestClass_non_ASCII
+        {
+            private ManualResetEvent mre1;
+            private String msg;
+            private object p1;
+            StringSocket sendSocket, receiveSocket;
+
+            // Timeout
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                TcpListener server = null;
+                TcpClient client = null;
+
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+                    sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    mre1 = new ManualResetEvent(false);
+
+                    receiveSocket.BeginReceive(CompletedReceive, 1);
+                    sendSocket.BeginSend("Hêllø Ψórlđ!\n", (e, o) => { }, null);
+
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting");
+                    // this will fail if the String Socket does not handle non-ASCII characters
+                    Assert.AreEqual("Hêllø Ψórlđ!", msg);
+                    System.Diagnostics.Debug.WriteLine(msg);
+                    Assert.AreEqual(1, p1);
+                }
+                finally
+                {
+                    sendSocket.Close();
+                    receiveSocket.Close();
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            //callback
+            private void CompletedReceive(String s, Exception o, object payload)
+            {
+                msg = s;
+                p1 = payload;
+                mre1.Set();
+            }
+        }
+
+        ///<author>Josh Oblinsky and Ryan Kingston</author>
+        /// <summary>
+        ///These are the tests that we created for StringSocketTest
+        ///</summary>
+        [TestClass()]
+        public class SendBeforeReceiveTest
+        {
+
+            /// <summary>
+            /// Tests to make sure that if Send is called before receive that the string will still be received, and not
+            /// discarded. This can happen when the socket is loaded, but does not have any recipients for
+            /// it's information.
+            ///</summary>
+            [TestMethod()]
+            public void TestSendBeforeReceive()
+            {
+                new SendBeforeReceive().run(4001); //Run the test.
+            }
+
+            public class SendBeforeReceive
+            {
+                //Data used by the receiveSocket.
+                private ManualResetEvent resetEvent;
+                private String receivedString;
+                private object receivedPayload;
+
+                // Timeout used in test case
+                private static int waitTime = 2000;
+
+                public void run(int port)
+                {
+                    // Create and start a server and client.
+                    TcpListener server = null;
+                    TcpClient client = null;
+
+                    try
+                    {
+                        //Initialize the connection.
+                        server = new TcpListener(IPAddress.Any, port);
+                        server.Start();
+                        client = new TcpClient("localhost", port);
+
+                        // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                        // method here, which is OK for a test case.
+                        Socket serverSocket = server.AcceptSocket();
+                        Socket clientSocket = client.Client;
+
+                        // Wrap the two ends of the connection into StringSockets
+                        StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                        StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                        // Communicate between the threads of the test cases
+                        resetEvent = new ManualResetEvent(false);
+
+                        //Send the string of data to the socket before receive has been called
+                        String msg = "This is a test, bro.\n";
+                        sendSocket.BeginSend(msg, (e, o) => { }, null);
+
+                        //Make a receive request after data has been read into the socket.
+                        receiveSocket.BeginReceive(CompletedReceive1, 1);
+
+                        //Ensure that the data was received correctly.
+                        Assert.AreEqual(true, resetEvent.WaitOne(waitTime), "Timed out waiting 1");
+                        Assert.AreEqual("This is a test, bro.", receivedString);
+                        Assert.AreEqual(1, receivedPayload);
+                    }
+                    finally
+                    {
+                        //Stop the server, and discard the socket connection.
+                        server.Stop();
+                        client.Close();
+                    }
+                }
+
+                // This is the callback for the receive request.  We can't make assertions anywhere
+                // but the main thread, so we write the values to member variables so they can be tested
+                // on the main thread.
+                private void CompletedReceive1(String s, Exception o, object payload)
+                {
+                    receivedString = s;
+                    receivedPayload = payload;
+                    resetEvent.Set();
+                }
+            }
+
+
+        }
+
+        /// <author>Xiaobing Rawlinson and Sam Callister</author>
+        /// <summary>
+        /// Starts the test that will test sending and recieving 5 strings. The test is given
+        /// 20 seconds to complete.
+        ///</summary>
+        [TestMethod()]
+        public void MultiStringTest()
+        {
+            new StressTest().run(4000);
+        }
+
+        /// <summary>
+        /// This tests sending and recieving 5 strings.
+        /// </summary>
+        public class StressTest
+        {
+
+
+            // Stores all received strings
+            private HashSet<string> receiveStrings = new HashSet<string>();
+
+            // Stores all send strings
+            private HashSet<string> sendStrings = new HashSet<string>();
+
+            // Stores all strings that where sent without the \n
+            private HashSet<string> correctStrings = new HashSet<string>();
+
+            // Size of strings being handled
+            private int size = 5;
+
+            // TIMEOUT USED IN TEST CASE, 20 SECONDS IS USED YOU MAY NEED MORE TIME
+            private static int timeout = 20000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+
+                try
+                {
+                    // Set up server and client
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    //mre1 = new ManualResetEvent(false);
+                    //mre2 = new ManualResetEvent(false);
+
+                    // Make 5 recieve requests
+                    for (int i = 0; i < size; i++)
+                    {
+
+                        receiveSocket.BeginReceive(CompletedReceive1, i);
+                    }
+                    // Send 5 strings
+                    for (int i = size; i > 0; i--)
+                    {
+                        sendStrings.Add(i + " bottles of beer on the wall.\n");
+                        correctStrings.Add(i + " bottles of beer on the wall.");
+                    }
+
+                    // Send the strings
+                    foreach (string s in sendStrings)
+                    {
+                        sendSocket.BeginSend(s, (e, o) => { }, null);
+                    }
+                    // Wait to give enough time for the call backs to return
+                    Thread.Sleep(timeout);
+                    // Ensure that each string was recieved
+                    foreach (string s in correctStrings)
+                    {
+                        // Make sure the lines were received properly.   
+                        Assert.IsTrue(receiveStrings.Contains(s));
+                    }
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // Callback method that adds each recieved string to the recieveStrings HashSet.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                receiveStrings.Add(s);
+
+            }
+        }
+
+        /// <author> Conan Zhang and April Martin, modifying code provided by Professor de St. Germain</author>
+        /// <date> 11-11-14</date>
+        /// <summary>
+        /// Tests whether threads are processed in the same order they are received, even if the first thread has a ludicrously long
+        /// (and therefore slow) message and the second has a short one.
+        /// </summary>
+
+
+        [TestMethod()]
+        public void SendOrderTest()
+        {
+            new SendOrderClass().run(4001);
+        }
+
+        /// <summary>
+        /// Holds code for SendOrderTest
+        /// </summary>
+        public class SendOrderClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private String slowMsg;
+            private object p1;
+            private String fastMsg;
+            private object p2;
+
+            private int count = 0;
+            private int slowOrder;
+            private int fastOrder;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // Set slowMsg to an absurdly long string that should take a while to process.
+                    // Set fastMsg to a single character.
+                    slowMsg = @"{{About|the video game character|other uses|Kirby (disambiguation){{!}}Kirby}}
+                    {{Infobox VG character
+                    | width = 220px
+                    | name = Kirby
+                    | image = [[File:Kirby Wii.png|225px]]
+                    | caption = Kirby as he appears in ''[[Kirby's Return to Dream Land]]''
+                    | series = [[Kirby (series)|''Kirby'' series]]
+                    | firstgame = ''[[Kirby's Dream Land]]'' (1992)
+                    | creator = [[Masahiro Sakurai]]
+                    | artist = Masahiro Sakurai
+                    | japanactor = [[Mayumi Tanaka]] (1994)<br>[[Makiko Ohmoto]] (1999-present)
+                    }}
+                    {{nihongo|'''Kirby'''|カービィ|Kābī}} is a [[Character (arts)|fictional character]] and the protagonist of the 
+                    ''[[Kirby (series)|Kirby series]]'' of video games owned by [[Nintendo]]. As one of Nintendo's most famous and familiar icons, 
+                    Kirby's round, pink appearance and ability to copy his foe's powers to use as his own has made him a well known figure in video 
+                    games, consistently ranked as one of the most iconic video game characters. He made his first appearance in 1992 in ''[[Kirby's 
+                    Dream Land]]'' for the [[Game Boy]]. Originally a placeholder, created by [[Masahiro Sakurai]], for the game's early development, 
+                    he has since then starred in over 20 games, ranging from [[Action game|action]] [[Platform game|platformers]] to [[Kirby's Pinball
+                    Land|pinball]], [[Puzzle game|puzzle]] and [[Kirby Air Ride|racing]] games, and has been featured as a playable fighter in all 
+                    ''[[Super Smash Bros.]]'' games. He has also starred in his own [[Kirby: Right Back at Ya|anime]] and manga series. His most 
+                    recent appearance is in ''[[Super Smash Bros. for Nintendo 3DS and Wii U]]'', released in 2014 for the [[Nintendo 3DS]] and [[Wii 
+                    U]]. Since 1999, he has been voiced by [[Makiko Ohmoto]].
+                    Kirby is famous for his ability to inhale objects and creatures to obtain their attributes, as well as his ability to float with 
+`                   puffed cheeks. He uses these abilities to rescue various lands, such as his home world of Dream Land, from evil forces and 
+                    antagonists, such as [[Dark Matter (Kirby)|Dark Matter]] or [[Nightmare (Kirby)|Nightmare]]. On these adventures he often crosses 
+                    paths with his rivals, the gluttonous [[King Dedede]] and the mysterious [[Meta Knight]]. In virtually all his appearances,
+                    Kirby is depicted as cheerful, innocent, and food loving but becomes fearless, bold, and brave in the face of danger.
+                    == Concept and creation ==";
+                    fastMsg = "!";
+
+                    // Send slowMsg before fastMsg
+                    sendSocket.BeginSend(slowMsg, slowCallback, 1);
+                    sendSocket.BeginSend(fastMsg, fastCallback, 2);
+
+                    // Make sure that (a) neither thread timed out and
+                    //(b) slowMsg was sent successfully before fastMsg
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual(0, slowOrder);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual(1, fastOrder);
+                    Assert.AreEqual(2, p2);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            /// <summary>
+            /// This is the callback for the first send request.  We can't make assertions anywhere
+            /// but the main thread, so we write the values to member variables so they can be tested
+            /// on the main thread.
+            /// </summary>
+            /// <param name="s"></param>
+            /// <param name="o"></param>
+            /// <param name="payload"></param>
+            private void slowCallback(Exception o, object payload)
+            {
+                slowOrder = count;
+                count++;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            /// <summary>
+            /// This is the callback for the second send request.
+            /// </summary>
+            /// <param name="s"></param>
+            /// <param name="o"></param>
+            /// <param name="payload"></param>
+            private void fastCallback(Exception o, object payload)
+            {
+                fastOrder = count;
+                count++;
+                p2 = payload;
+                mre2.Set();
+            }
+        }
+
+        /// <author>Kirk Partridge, Kameron Paulsen</author>
+        /// <timecreated>11/12/14</timecreated>
+        /// <summary>
+        /// This method tests the StringSockets ability
+        /// to Send Multiple strings before the BeginReceive
+        /// is called.  It Sends both by single characters
+        /// and full Strings.
+        ///</summary>
+        [TestMethod()]
+        public void MultipleSendBeforeReceiveTest()
+        {
+            new MultipleSendBeforeReceive().run(4001);
+        }
+        public class MultipleSendBeforeReceive
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private ManualResetEvent mre3;
+            private String s1;
+            private object p1;
+            private String s2;
+            private object p2;
+            private String s3;
+            private object p3;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+                    mre3 = new ManualResetEvent(false);
+
+
+
+                    // Now send the data.  Hope those receive requests didn't block!
+                    String msg = "Hello world\nThis is a test\nStrings";
+                    foreach (char c in msg)
+                    {
+                        sendSocket.BeginSend(c.ToString(), (e, o) => { }, null);
+                    }
+                    //Second Message to be sent
+                    String msg2 = " sure are neat\n";
+                    //Send the second message.  Should be appended to the leftovers from the foreach loop ("String").
+                    sendSocket.BeginSend(msg2, (e, o) => { }, null);
+
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+                    receiveSocket.BeginReceive(CompletedReceive2, 2);
+                    receiveSocket.BeginReceive(CompletedReceive3, 3);
+
+                    // Make sure the lines were received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("Hello world", s1);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual("This is a test", s2);
+                    Assert.AreEqual(2, p2);
+
+                    Assert.AreEqual(true, mre3.WaitOne(timeout), "Timed out waiting 3");
+                    Assert.AreEqual("Strings sure are neat", s3);
+                    Assert.AreEqual(3, p3);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request.  We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            // This is the callback for the second receive request.
+            private void CompletedReceive2(String s, Exception o, object payload)
+            {
+                s2 = s;
+                p2 = payload;
+                mre2.Set();
+            }
+            // This is the callback for the third receive request.
+            private void CompletedReceive3(String s, Exception o, object payload)
+            {
+                s3 = s;
+                p3 = payload;
+                mre3.Set();
+            }
+        }
+
+        /// <author>Jake Anderson and Christopher Bowcutt</author>
+        /// <summary>
+        /// Test to check that StringSocket receives lines ending with \r instead of \n
+        /// Note: This is modeled after the given Test1
+        /// </summary>
+        [TestMethod]
+        public void CarriageReturnTest()
+        {
+
+            new TestCarriageReturnClass().run(4002);
+
+        }
+
+        /// <summary>
+        /// Class used to run CarriageReturnText
+        /// </summary>
+        public class TestCarriageReturnClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private String s1;
+            private object p1;
+            private String s2;
+            private object p2;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection. We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+
+                    // Make two receive requests
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+                    receiveSocket.BeginReceive(CompletedReceive2, 2);
+
+                    // Now send the data. Hope those receive requests didn't block!
+                    // NOTE: This is the line that has been changed
+                    String msg = "Hello world\r\nThis is a test\r\n";
+                    foreach (char c in msg)
+                    {
+                        sendSocket.BeginSend(c.ToString(), (e, o) => { }, null);
+                    }
+
+                    // Make sure the lines were received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("Hello world", s1);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual("This is a test", s2);
+                    Assert.AreEqual(2, p2);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request. We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            // This is the callback for the second receive request.
+            private void CompletedReceive2(String s, Exception o, object payload)
+            {
+                s2 = s;
+                p2 = payload;
+                mre2.Set();
+            }
+        }
+
+        /// <summary>
+        /// <author>Albert Tom, Matthew Lemon</author>
+        /// This test stress tests the socket on sending long strings all at once
+        /// Quotes provided by Jedi Master and super spy Liam Neeson
+        /// </summary>
+
+        [TestMethod()]
+        public void LongStringTest()
+        {
+            new LongStringTestClass().run(4001);
+        }
+
+        public class LongStringTestClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private String s1;
+            private object p1;
+            private String s2;
+            private object p2;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection. We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+
+                    // Make two receive requests
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+                    receiveSocket.BeginReceive(CompletedReceive2, 2);
+
+                    // Now send the data. Stress test long strings
+                    String msg = "I don't have money. But what I do have are a very particular set of skills acquired over a very long career in the shadows, skills that make me a nightmare for people like you. If you let my daughter go now, that will be the end of it. I will not look for you, I will not pursue you. But if you don't, I will look for you, I will find you. And I will kill you\nI don't have anything else. [waves hand] But credits will do fine.\n";
+
+                    sendSocket.BeginSend(msg, (e, o) => { }, null);
+
+                    // Make sure the lines were received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("I don't have money. But what I do have are a very particular set of skills acquired over a very long career in the shadows, skills that make me a nightmare for people like you. If you let my daughter go now, that will be the end of it. I will not look for you, I will not pursue you. But if you don't, I will look for you, I will find you. And I will kill you", s1);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual("I don't have anything else. [waves hand] But credits will do fine.", s2);
+                    Assert.AreEqual(2, p2);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request. We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            // This is the callback for the second receive request.
+            private void CompletedReceive2(String s, Exception o, object payload)
+            {
+                s2 = s;
+                p2 = payload;
+                mre2.Set();
+            }
+        }
+
+        /// <summary>
+        /// Author: Ryan Farr
+        /// A simple test to make sure Close() works
+        ///</summary>
+        [TestMethod()]
+        [ExpectedException(typeof(System.ObjectDisposedException))]
+        public void TestCloseBasic()
+        {
+            TcpListener server = new TcpListener(IPAddress.Any, 4006);
+            server.Start();
+            TcpClient client = new TcpClient("localhost", 4006);
+
+            Socket serverSocket = server.AcceptSocket();
+            Socket clientSocket = client.Client;
+
+            StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+            StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+            sendSocket.Close();
+            receiveSocket.Close();
+
+            bool test1 = serverSocket.Available == 0; //Should fail here because socket should be shutdown and closed
+        }
+
+        /// <summary>
+        /// @Author Eric Albee
+        /// @Author Douglas Canada
+        /// Testing foreign and odd Chars
+        /// in large quanity to see if the
+        /// socket is recieving the correct sequence.
+        /// November 12, 2014
+        /// </summary>
+        [TestMethod()]
+        public void beeCanForeignTest()
+        {
+            new ForeignTest().run(4001);
+        }
+
+        public class ForeignTest
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private String s1 = "";
+            private object p1;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+
+                    // Make a receive request
+                    receiveSocket.BeginReceive(CompletedReceive, 1);
+
+                    String msg = "";
+                    int SIZE = 1000;
+                    string[] letters = new string[SIZE];
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        letters[i] = (msg + (char)('a' + i));
+                    }
+
+                    string sentMessage = "";
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        sendSocket.BeginSend(letters[i], (e, o) => { }, null);
+
+                        // building the message to be asserted
+                        sentMessage += letters[i];
+                    }
+
+                    sendSocket.BeginSend("\n", (e, o) => { }, null);
+
+                    // Make sure the line was received properly.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual(sentMessage, s1);
+                    Assert.AreEqual(1, p1);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the receive request.  We can't make assertions anywhere
+            // but the main thread, so we write the values to member variables so they can be tested
+            // on the main thread.
+            private void CompletedReceive(String s, Exception o, object payload)
+            {
+                s1 += s;
+                p1 = payload;
+                mre1.Set();
+            }
+        }
+
+        /// <summary>
+        /// Authors: Ryan Welling and Jared Jensen
+        /// 
+        /// This method opens sockets, begins sending and then closes them
+        /// and tries sending again after it has been closed.  Expects Exception
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CloseTest2()
+        {
+            // Create and start a server and client.
+            TcpListener server = null;
+            TcpClient client = null;
+
+            server = new TcpListener(IPAddress.Any, 4042);
+            server.Start();
+            client = new TcpClient("localhost", 4042);
+
+            // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+            // method here, which is OK for a test case.
+            Socket serverSocket = server.AcceptSocket();
+            Socket clientSocket = client.Client;
+
+            // Wrap the two ends of the connection into StringSockets
+            StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+            StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+            // This will coordinate communication between the threads of the test cases
+            ManualResetEvent mre1 = new ManualResetEvent(false);
+            ManualResetEvent mre2 = new ManualResetEvent(false);
+
+            // Make two receive requests
+            receiveSocket.BeginReceive((s, e, o) => { }, 1);
+            receiveSocket.BeginReceive((s, e, o) => { }, 2);
+
+            // Now send the data.  
+            string msg1 = "Hello world\n";
+            string msg2 = "This is a test\n";
+
+            sendSocket.BeginSend(msg1, (e, o) => { }, null);
+            sendSocket.Close();
+
+            // should throw exception, socket was closed
+            sendSocket.BeginSend(msg2, (e, o) => { }, null);
+        }
+
+        /// <summary>
+        /// Authors: Clint Wilkinson & Daniel Kenner
+        /// 
+        /// Class for Stress Test, based off of Test1Class given as part of PS7.
+        /// 
+        ///This is a test class for StringSocketTest and is intended
+        ///to contain all StringSocketTest Unit Tests
+        ///</summary>
+        [TestClass()]
+        public class StringSocketStressTest
+        {
+            /// <summary>
+            /// A stress test for BeginSend and BeginReceive
+            /// </summary>
+            [TestMethod()]
+            public void StressTest()
+            {
+                new StressTestClass().run(4001);
+            }
+
+            /// <summary>
+            /// Class for Stress Test, based off of Test1Class given as part of PS7.
+            /// </summary>
+            public class StressTestClass
+            {
+                // Data that is shared across threads
+                private ManualResetEvent mre1;
+                private ManualResetEvent mre2;
+                private String s1;
+                private object p1;
+                private String s2;
+                private object p2;
+
+                // Timeout used in test case
+                private static int timeout = 2000;
+
+                public void run(int port)
+                {
+                    // Create and start a server and client.
+                    TcpListener server = null;
+                    TcpClient client = null;
+
+                    try
+                    {
+                        //setup the server
+                        server = new TcpListener(IPAddress.Any, port);
+                        server.Start();
+                        client = new TcpClient("localhost", port);
+
+                        // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+                        // method here, which is OK for a test case.
+                        Socket serverSocket = server.AcceptSocket();
+                        Socket clientSocket = client.Client;
+
+                        // Wrap the two ends of the connection into StringSockets
+                        StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                        StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                        // This will coordinate communication between the threads of the test cases
+                        mre1 = new ManualResetEvent(false);
+                        mre2 = new ManualResetEvent(false);
+
+                        //test a bunch of little strings
+                        for (int i = 0; i <= 25000; i++)
+                        {
+                            //setup the receive socket
+                            receiveSocket.BeginReceive(CompletedReceive1, 1);
+                            //generate the string
+                            sendSocket.BeginSend("A" + i + "\n", (e, o) => { }, null);
+                            //wait a bit
+                            Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                            //reset the timer
+                            mre1.Reset();
+                            //check that we are getting what we are supposed to
+                            Assert.AreEqual("A" + i, s1);
+                            //write out for debugging.
+                            System.Diagnostics.Debug.WriteLine(s1);
+
+                        }
+
+                        //generate a big string to test with
+                        String stress = "";
+                        Random rand = new Random();
+                        //put in character by character
+                        for (int i = 0; i <= 25000; i++)
+                        {
+                            stress += ((char)(65 + rand.Next(26))).ToString();
+                        }
+
+                        //setup the receiver socket
+                        receiveSocket.BeginReceive(CompletedReceive2, 2);
+                        //send the big string
+                        sendSocket.BeginSend(stress + "\n", (e, o) => { }, null);
+
+                        System.Diagnostics.Debug.WriteLine(stress);
+
+                        // Now send the data.  Hope those receive requests didn't block!
+                        Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                        Assert.AreEqual(stress, s2);
+                        Assert.AreEqual(2, p2);
+                        //separate from last test
+                        System.Diagnostics.Debug.WriteLine("");
+                        //write for debugging
+                        System.Diagnostics.Debug.WriteLine(s2);
+
+                    }
+                    finally
+                    {
+                        server.Stop();
+                        client.Close();
+                    }
+                }
+                // This is the callback for the first receive request.  We can't make assertions anywhere
+                // but the main thread, so we write the values to member variables so they can be tested
+                // on the main thread.
+                private void CompletedReceive1(String s, Exception o, object payload)
+                {
+                    s1 = s;
+                    p1 = payload;
+                    mre1.Set();
+                }
+                // This is the callback for the second receive request.
+                private void CompletedReceive2(String s, Exception o, object payload)
+                {
+                    s2 = s;
+                    p2 = payload;
+                    mre2.Set();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Written by: Kyle Hiroyasu and Drake Bennion
+        /// This test is designed to ensure that string sockets will properly wait for strings to be sent and received
+        /// The last send also ensures that a message is broken up by newline character but maintains same payload
+        /// </summary>
+        [TestMethod()]
+        public void MessageOrderStressTest()
+        {
+            int Port = 4000;
+            //int timeout = 30000;
+            TcpListener server = null;
+            TcpClient client = null;
+
+
+            try
+            {
+                server = new TcpListener(IPAddress.Any, Port);
+                server.Start();
+                client = new TcpClient("localhost", Port);
+                Socket serverSocket = server.AcceptSocket();
+                Socket clientSocket = client.Client;
+
+                StringSocket send = new StringSocket(serverSocket, Encoding.UTF8);
+                StringSocket receive = new StringSocket(clientSocket, Encoding.UTF8);
+
+                //Messages
+                string message1 = "The sky is blue\n";
+                string message2 = "The grass is green\n";
+                string message3 = "Drakes hat is blue\n";
+                string message4 = (new String('h', 1000)) + message1 + message2 + message3;
+                string message4s = (new String('h', 1000)) + message1;
+
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message1, message);
+                    Assert.AreEqual(1, o);
+                }, 1);
+
+                send.BeginSend(message1, (e, o) => { }, 1);
+
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message2, message);
+                    Assert.AreEqual(2, o);
+                }, 1);
+
+                send.BeginSend(message2, (e, o) => { }, 2);
+                send.BeginSend(message3, (e, o) => { }, 3);
+                send.BeginSend(message4, (e, o) => { }, 4);
+
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message3, message);
+                    Assert.AreEqual(3, o);
+                }, 1);
+
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message4s, message);
+                    Assert.AreEqual(4, o);
+                }, 1);
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message2, message);
+                    Assert.AreEqual(4, o);
+                }, 1);
+                receive.BeginReceive((message, e, o) =>
+                {
+                    Assert.AreEqual(message3, message);
+                    Assert.AreEqual(4, o);
+                }, 1);
+
+            }
+            finally
+            {
+                server.Stop();
+                client.Close();
+            }
+        }
+
+        /// <summary>
+        /// Written by Ella Ortega and Jack Stafford for CS 3500, Fall 2014
+        /// Ensures data was transmitted in the correct order.
+        /// Sends a sentence with newlines instead of spaces.
+        /// This enables seven receives.
+        /// However, only three receives are called.
+        /// These receives are checked for accuracy.
+        /// </summary>
+        [TestMethod]
+        public void TestTransmissionOrderTest()
+        {
+            new TestLongStringSmallReturn().run(4001);
+        }
+
+        /// <summary>
+        /// Called by TestMethod TestLongStringSmallReturn()
+        /// </summary>
+        public class TestLongStringSmallReturn
+        {
+            /// <summary>
+            /// This method instantiates necessary object and calls BeginSend and BeginReceive
+            /// </summary>
+            /// <param name="port"></param>
+            public void run(int port)
+            {
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will be received as seven separate messages, even though it's sent all together
+                    sendSocket.BeginSend("Plateaus\nare\nthe\nhighest\nform\nof\nflattery.\n", Callback1, 1);
+
+                    receiveSocket.BeginReceive(Callback2, 2);
+                    receiveSocket.BeginReceive(Callback3, 3);
+                    receiveSocket.BeginReceive(Callback4, 4);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            /// <summary>
+            /// Ensures no exceptions occured during sending and payload was returned correctly.
+            /// </summary>
+            /// <param name="e">Returned exception</param>
+            /// <param name="payload"></param>
+            private void Callback1(Exception e, object payload)
+            {
+                Assert.AreEqual(null, e);
+                Assert.AreEqual(1, (int)payload);
+            }
+
+            /// <summary>
+            /// Ensures no exceptions occured during receiving, payload was returned correctly, 
+            /// and the correct message was received.
+            /// </summary>
+            /// <param name="message"></param>
+            /// <param name="e"></param>
+            /// <param name="payload"></param>
+            private void Callback2(String message, Exception e, object payload)
+            {
+                Assert.AreEqual("Plateaus", message);
+                Assert.AreEqual(null, e);
+                Assert.AreEqual(2, (int)payload);
+            }
+
+            /// <summary>
+            /// Ensures no exceptions occured during receiving, payload was returned correctly, 
+            /// and the correct message was received.
+            /// </summary>
+            /// <param name="message"></param>
+            /// <param name="e"></param>
+            /// <param name="payload"></param>
+            private void Callback3(String message, Exception e, object payload)
+            {
+                Assert.AreEqual("are", message);
+                Assert.AreEqual(null, e);
+                Assert.AreEqual(3, (int)payload);
+            }
+
+            /// <summary>
+            /// Ensures no exceptions occured during receiving, payload was returned correctly, 
+            /// and the correct message was received.
+            /// </summary>
+            /// <param name="message"></param>
+            /// <param name="e"></param>
+            /// <param name="payload"></param>
+            private void Callback4(String message, Exception e, object payload)
+            {
+                Assert.AreEqual("the", message);
+                Assert.AreEqual(null, e);
+                Assert.AreEqual(4, (int)payload);
+            }
+        }
+
+        /// <summary>
+
+        /// Namgi Yoon u0759547
+
+        /// A simple test for BeginSend and BeginReceive
+
+        ///</summary>
+
+        [TestMethod()]
+
+        public void SimpleTest()
+        {
+
+            new StringSocketTester1().run(4001);
+
+        }
+
+        /// <summary>
+
+        /// Class used for test1
+
+        /// </summary>
+
+        public class StringSocketTester1
+        {
+
+            // Data that is shared across threads
+
+            private ManualResetEvent mre1, mre2, mre3;
+
+            private String string1, string2, string3;
+
+            private object payload1, payload2, payload3;
+
+
+
+            // Timeout used in test case
+
+            private static int timeout = 2000;
+
+
+
+            public void run(int port)
+            {
+
+                // Create and start a server and client.
+
+                TcpListener server = null;
+
+                TcpClient client = null;
+
+                try
+                {
+
+                    server = new TcpListener(IPAddress.Any, port);
+
+                    server.Start();
+
+                    client = new TcpClient("localhost", port);
+
+
+
+                    // Obtain the sockets from the two ends of the connection.  We are using the blocking AcceptSocket()
+
+                    // method here, which is OK for a test case.
+
+                    Socket serverSocket = server.AcceptSocket();
+
+                    Socket clientSocket = client.Client;
+
+
+
+                    // Wrap the two ends of the connection into StringSockets
+
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+
+
+                    // This will coordinate communication between the threads of the test cases
+
+                    mre1 = new ManualResetEvent(false);
+
+                    mre2 = new ManualResetEvent(false);
+
+                    mre3 = new ManualResetEvent(false);
+
+
+
+                    // Make two receive requests
+
+                    receiveSocket.BeginReceive(CompletedReceive1, "payload for message 1");
+
+                    receiveSocket.BeginReceive(CompletedReceive2, "payload for message 2");
+
+                    receiveSocket.BeginReceive(CompletedReceive3, "payload for message 3");
+
+
+
+                    // Now send the data.  Hope those receive requests didn't block!
+
+                    String msg = "1\n2\n3\n";
+
+                    foreach (char c in msg)
+                    {
+
+                        sendSocket.BeginSend(c.ToString(), (e, o) => { }, null);
+
+                    }
+
+
+
+                    //Whole message at once.
+
+                    //sendSocket.BeginSend(msg, (e, o) => { }, null);
+
+
+
+                    //Checking message number 1
+
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+
+                    Assert.AreEqual("1", string1);
+
+                    Assert.AreEqual("payload for message 1", payload1);
+
+
+
+                    //Checking message number 2
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+
+                    Assert.AreEqual("2", string2);
+
+                    Assert.AreEqual("payload for message 2", payload2);
+
+
+
+                    //Checking message number 3
+
+                    Assert.AreEqual(true, mre3.WaitOne(timeout), "Timed out waiting 3");
+
+                    Assert.AreEqual("3", string3);
+
+                    Assert.AreEqual("payload for message 3", payload3);
+
+
+
+
+
+                }
+
+                finally
+                {
+
+                    server.Stop();
+
+                    client.Close();
+
+                }
+
+            }
+
+            // This is the callbacks for requests.
+
+            private void CompletedReceive1(String s, Exception o, object payload) { string1 = s; payload1 = payload; mre1.Set(); }
+
+            private void CompletedReceive2(String s, Exception o, object payload) { string2 = s; payload2 = payload; mre2.Set(); }
+
+            private void CompletedReceive3(String s, Exception o, object payload) { string3 = s; payload3 = payload; mre3.Set(); }
+
+        }
+
+        // Created by: Sam Trout and Sam England
+        /// <summary>
+        /// Test case checks whether or not the callback method is sent on its own threadpool. Fails if it times out because 
+        /// the thread is blocked.
+        /// </summary>
+        [TestMethod()]
+        public void BeginSendSeperateThread()
+        {
+            new BeginSendSeperateClass().run(4001);
+        }
+
+        public class BeginSendSeperateClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre = new ManualResetEvent(false);
+
+            // Timeout used in test case
+            private static int timeout = 20000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection. We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+
+                    // Now send the data. Will block after newline if callback doesnt come back in its own threadpool
+                    String msg = "Hopefully this works\n";
+                    String msg2 = "Second message\n";
+
+                    //calls beginsend 2 times for the different messages
+                    sendSocket.BeginSend(msg, callback1, 1);
+                    sendSocket.BeginSend(msg2, callback2, 2);
+
+                    Assert.AreEqual(true, mre.WaitOne(timeout), "Timed out, callback1 blocked second BeginSend");
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            /// <summary>
+            /// This callback creates an infinite while loop and if not handled properly in StringSocket will cause the program
+            /// to timeout and fail
+            /// </summary>
+            /// <param name="e"> Default </param>
+            /// <param name="payload"> Default </param>
+            private void callback1(Exception e, object payload)
+            {
+                while (true) ;
+            }
+
+            /// <summary>
+            /// This callback is for the 2nd string, this callback wont be called unless handled properly in the StringSocket
+            /// mre will never be set and the program will timeout
+            /// </summary>
+            /// <param name="e"> Default </param>
+            /// <param name="payload"> Default</param>
+            private void callback2(Exception e, object payload)
+            {
+                mre.Set();
+            }
+        }
+
+        /// <summary>
+        ///James Watts & Stuart Johnsen
+        ///
+        ///Tests sending a single long String that contains 4 lines, seperated by "\n". The string is the lyrics
+        ///to the chorus of Haddaway's "What is Love?" Lines are placed in the correct order using a sequential 
+        ///integer from the callback's payload.
+        ///</summary>
+        [TestMethod()]
+        public void What_Is_Love_Test()
+        {
+            new What_Is_Love_TestClass().run(4005);
+        }
+
+        public class What_Is_Love_TestClass
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre0;
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private ManualResetEvent mre3;
+
+            //The String to be sent
+            String whatIsLove = "What is love?\nBaby don't hurt me,\nDon't hurt me\nNo more!\n";
+
+            //A String[] for the received lines of text. Should contain 4 elements when completed.
+            String[] receivedLines = new String[4];
+
+            // Timeout used in test case
+            //private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection. We are using the blocking AcceptSocket()
+                    // method here, which is OK for a test case.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Wrap the two ends of the connection into StringSockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre0 = new ManualResetEvent(false);
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+                    mre3 = new ManualResetEvent(false);
+
+                    //Setup 4 BeginReceives to receive the 4 lines.
+                    for (int i = 0; i < 4; i++)
+                    {
+                        receiveSocket.BeginReceive(WhatIsLove_Callback, i);
+                    }
+
+                    sendSocket.BeginSend(whatIsLove, (e, o) => { }, null);
+
+                    Thread.Sleep(5000);
+
+                    Assert.AreEqual("What is love?", receivedLines[0]);
+                    Assert.AreEqual("Baby don't hurt me,", receivedLines[1]);
+                    Assert.AreEqual("Don't hurt me", receivedLines[2]);
+                    Assert.AreEqual("No more!", receivedLines[3]);
+                }
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            } //End run
+
+
+            /// <summary>
+            /// The callback for receive requests, uses the callback's payload to place lines in the correct order
+            ///in a String array.
+            ///The appropriate ManualResetEvent is chosen based on the callback's payload.
+            /// </summary>
+            private void WhatIsLove_Callback(String s, Exception o, object payload)
+            {
+                int index = (int)payload;
+                receivedLines[index] = s;
+
+                switch (index)
+                {
+                    case 0:
+                        mre0.Set();
+                        break;
+                    case 1:
+                        mre1.Set();
+                        break;
+                    case 2:
+                        mre2.Set();
+                        break;
+                    case 3:
+                        mre3.Set();
+                        break;
+                }
+            }
+        }
+
+        /// <author> Zane Zakraisek and Alex Ferro </author>
+        /// <summary>
+        /// Test that a long string, then a short string, and then a long one are correctly received in in the right sent order.
+        /// Written by Zane Zakraisek and Alex Ferro
+        /// </summary>
+        [TestMethod()]
+        public void TestLongShortLongStringRX() {
+        new TestLongShortLongStringRXClass().run(4002);
+        }
+        /// <summary>
+        /// This is the test class for TestLongShortLongStringRX
+        /// Test that a long string, then a short string, and then a long one are correctly received in in the right sent order.
+        /// Written by Zane Zakraisek and Alex Ferro
+        /// </summary>
+        public class TestLongShortLongStringRXClass {
+        // Data that is shared across threads
+        // Used to ensure the correct testing assertion on the main thread
+        private ManualResetEvent mre1;
+        private ManualResetEvent mre2;
+        private ManualResetEvent mre3;
+        private String s1;
+        private object p1;
+        private String s2;
+        private object p2;
+        private String s3;
+        private object p3;
+        // Test strings
+        private String shortString = "This is a journey through time!\n";
+        private String longString = "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single" +
+        "domestic sufficed to serve him. He breakfasted and dined at the club" +
+        "or near friends, which is certainly more unusual. He lived alone" +
+        "in his house in Saville Row, whither none penetrated. A single\n";
+
+        // Timeout used in test case
+        private static int timeout = 2000;
+        /// <summary>
+        /// Run the test on the specified port
+        /// </summary>
+        /// <param name="port"></param>
+        public void run(int port) {
+        // Create and start a server and client.
+        TcpListener server = null;
+        TcpClient client = null;
+
+        try {
+        server = new TcpListener(IPAddress.Any, port);
+        server.Start();
+        client = new TcpClient("localhost", port);
+
+        // Obtain the sockets from the two ends of the connection. We are using the blocking AcceptSocket()
+        // method here, which is OK for a test case.
+        Socket serverSocket = server.AcceptSocket();
+        Socket clientSocket = client.Client;
+
+        // Wrap the two ends of the connection into StringSockets
+        StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+        StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+        // This will coordinate communication between the threads of the test cases
+        mre1 = new ManualResetEvent(false);
+        mre2 = new ManualResetEvent(false);
+        mre3 = new ManualResetEvent(false);
+
+        receiveSocket.BeginReceive(CompletedReceive1, 1);
+        receiveSocket.BeginReceive(CompletedReceive2, 2);
+        receiveSocket.BeginReceive(CompletedReceive3, 3);
+
+        sendSocket.BeginSend(longString, (e, o) => { }, null);
+        sendSocket.BeginSend(shortString, (e, o) => { }, null);
+        sendSocket.BeginSend(longString, (e, o) => { }, null);
+
+        // Make sure the lines were received properly.
+        Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+        Assert.AreEqual(longString.Replace("\n", ""), s1);
+        Assert.AreEqual(1, p1);
+
+        Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+        Assert.AreEqual(shortString.Replace("\n", ""), s2);
+        Assert.AreEqual(2, p2);
+
+        Assert.AreEqual(true, mre3.WaitOne(timeout), "Timed out waiting 3");
+        Assert.AreEqual(longString.Replace("\n", ""), s3);
+        Assert.AreEqual(3, p3);
+        } finally {
+        server.Stop();
+        client.Close();
+        }
+        }
+
+        /// <summary>
+        /// This is the callback for the first receive request. We can't make assertions anywhere
+        /// but the main thread, so we write the values to member variables so they can be tested
+        /// on the main thread.
+        /// </summary>
+        private void CompletedReceive1(String s, Exception o, object payload) {
+        s1 = s;
+        p1 = payload;
+        mre1.Set();
+        }
+        /// <summary>
+        /// This is the callback for the second receive request.
+        /// </summary>
+        private void CompletedReceive2(String s, Exception o, object payload) {
+        s2 = s;
+        p2 = payload;
+        mre2.Set();
+        }
+        /// <summary>
+        /// This is the callback for the third receive request.
+        /// </summary>
+        private void CompletedReceive3(String s, Exception o, object payload) {
+        s3 = s;
+        p3 = payload;
+        mre3.Set();
+        }
+        }
+        
+        // didn't add test by Eric Stubbs it was taking too long
+        // didn't add test by Courtney Burness because it was messed up
+
+        	/// <summary>
+        /// A test that makes sure data is being stored internally to the
+	/// StringSocket when there are no pending receive requests yet. 
+	/// Also, that once two receive requests are made, that those requests
+	/// grab only two strings from the beginning of the stored data and
+	/// that the remaining stored data does not interfere and overwrite it.
+        ///</summary>
+        [TestMethod()]
+        public void Test4()
+        {
+            new Test4Class().run(4001);
+        }
+
+        public class Test4Class
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre1;
+            private ManualResetEvent mre2;
+            private String s1;
+            private object p1;
+            private String s2;
+            private object p2;
+
+            // Timeout used in test case
+            private static int timeout = 2000;
+
+            public void run(int port)
+            {
+                // Create and start a server and client.
+                TcpListener server = null;
+                TcpClient client = null;
+
+                try
+                {
+                    // Build and start the server.
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    client = new TcpClient("localhost", port);
+
+                    // Obtain the sockets from the two ends of the connection.
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // Construct the StringSockets with the already connected underlying sockets.
+                    StringSocket sendSocket = new StringSocket(serverSocket, new UTF8Encoding());
+                    StringSocket receiveSocket = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    // This will coordinate communication between the threads of the test cases
+                    mre1 = new ManualResetEvent(false);
+                    mre2 = new ManualResetEvent(false);
+
+                    // Send the data in the specified string. There are not yet any receive requests on the 
+                    // receiving socket. The data should be stored internally to the receiving string socket
+                    // and processed after a receive request is made.
+                    String msg = "Space\n is disease and \ndanger wrap\nped in darkn\ness and silence\n.\n";
+                    foreach (char c in msg)
+                    {
+                        sendSocket.BeginSend(c.ToString(), (e, o) => { }, null);
+                    }
+
+                    // Make two receive requests. They should only receive the first two increments of data
+                    // containing newline characters ("Space" and " is disease and ")
+                    receiveSocket.BeginReceive(CompletedReceive1, 1);
+                    receiveSocket.BeginReceive(CompletedReceive2, 2);
+
+                    // Make sure that the extra jibberish did not overwrite the expected
+                    // strings.
+                    Assert.AreEqual(true, mre1.WaitOne(timeout), "Timed out waiting 1");
+                    Assert.AreEqual("Space", s1);
+                    Assert.AreEqual(1, p1);
+
+                    Assert.AreEqual(true, mre2.WaitOne(timeout), "Timed out waiting 2");
+                    Assert.AreEqual(" is disease and ", s2);
+                    Assert.AreEqual(2, p2);
+                }
+                // Make sure to clean up sockets and close gracefully.
+                finally
+                {
+                    server.Stop();
+                    client.Close();
+                }
+            }
+
+            // This is the callback for the first receive request.
+            private void CompletedReceive1(String s, Exception o, object payload)
+            {
+                s1 = s;
+                p1 = payload;
+                mre1.Set();
+            }
+
+            // This is the callback for the second receive request.
+            private void CompletedReceive2(String s, Exception o, object payload)
+            {
+                s2 = s;
+                p2 = payload;
+                mre2.Set();
+            }
+        }
+
+        /// <summary>
+        /// Written by Camille Rasmussen and Jessie Delacenserie
+        /// 
+        /// This Test Method tests the behavior of the Close() method upon no calls to the BeginSend or
+        /// BeginReceive methods. This test makes sure that the client socket is not disconnected when
+        /// you invoke Close() on the sendSocket, but that the server socket is successfully disconnected
+        /// when you do so.
+        /// 
+        /// We also test to make sure you can't access the Socket after it's StringSocket's Close() has 
+        /// been invoked, by calling a Socket's Available property, which throws an exception if the
+        /// Socket has been closed properly.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod7()
+        {
+            new CloseWithoutReceieveOrSend().run(4001);
+        }
+
+        public class CloseWithoutReceieveOrSend
+        {
+            public void run(int port)
+            {
+                TcpListener server = null;
+                TcpClient client = null;
+
+                // set up random encoder to use
+                Encoding encoder = new ASCIIEncoding();
+
+                // to check if exception was thrown and handled
+                bool caught = false;
+
+                try
+                {
+                    // create and start the server
+                    server = new TcpListener(IPAddress.Any, port);
+                    server.Start();
+                    // create the client
+                    client = new TcpClient("localhost", port);
+
+                    // set up the server and client sockets
+                    Socket serverSocket = server.AcceptSocket();
+                    Socket clientSocket = client.Client;
+
+                    // set up string sockets with sockets
+                    StringSocket sendSocket = new StringSocket(serverSocket, encoder);
+                    StringSocket receiveSocket = new StringSocket(clientSocket, encoder);
+
+                    // make sure the sockets are connected initially
+                    Assert.IsTrue(serverSocket.Connected);
+                    Assert.IsTrue(clientSocket.Connected);
+
+                    // close the sendSocket String Socket
+                    sendSocket.Close();
+                    // make sure wrapped Socket specified is disconnected accordingly
+                    Assert.IsFalse(serverSocket.Connected);
+                    // and the other wrapped Socket isn't affected
+                    Assert.IsTrue(clientSocket.Connected);
+
+                    // close the receiveSocket String Socket
+                    receiveSocket.Close();
+                    // make sure wrapped socket specified is disconnected accordingly
+                    Assert.IsFalse(clientSocket.Connected);
+
+                    // this should throw an exception if the Socket was closed properly
+                    int amount = serverSocket.Available;
+                }
+                // exception caught here
+                catch (ObjectDisposedException e)
+                {
+                    caught = true;
+                }
+                finally
+                {
+                    // close up your resources and stop the server
+                    server.Stop();
+                    client.Close();
+
+                    // make sure proper exception was thrown and caught
+                    Assert.IsTrue(caught);
+                }
+            }
+        }
+
+        // didn't add Danial Ebling's test - see comment in forum
+    
+    }
+}

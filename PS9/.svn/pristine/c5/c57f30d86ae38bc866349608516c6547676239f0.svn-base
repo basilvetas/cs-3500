@@ -1,0 +1,278 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using CustomNetworking;
+
+
+namespace BC
+{
+    /// <summary>
+    /// The model component of MVC for our Boggle Client. This class provides methods for sending data
+    /// to the boggle server (player name and words found), and for receiving data from the boggle server
+    /// (such as score, time, etc).  When data is received from the server, it is then transmitted to either
+    /// HomePage.xaml.cs or GamePage.xaml.cs through the appropriate event. 
+    /// </summary>
+    public class BoggleClientModel
+    {
+        /// <summary>
+        /// Not sure if we need this.
+        /// </summary>
+        public static void Main()
+        {
+            Console.ReadLine();
+        }
+        /// <summary>
+        /// The socket used to communicate with the server.  If no connection has been
+        /// made yet, this is null.
+        /// </summary>
+        private StringSocket socket;
+
+        /// <summary>
+        /// The client associated with this connection to the server. If no connection
+        /// has been made, this is null.
+        /// </summary>
+        private TcpClient client;
+
+        /// <summary>
+        /// The 16 characters of the boggle board, as a string
+        /// </summary>
+        private string board;
+
+        /// <summary>
+        /// Opponent name
+        /// </summary>
+        private string opponentName;
+
+        /// <summary>
+        /// Length of this game
+        /// </summary>
+        private string gameLength;
+
+        /// <summary>
+        /// Getter for board characters
+        /// </summary>
+        /// <returns></returns>
+        public string getBoard()
+        {
+            return board;
+        }
+
+        /// <summary>
+        /// Setter for board characters
+        /// </summary>
+        /// <param name="b"></param>
+        public void setBoard(string b)
+        {
+            board = b;
+        }
+
+        /// <summary>
+        /// Getter for gameLength
+        /// </summary>
+        /// <returns></returns>
+        public string getTime()
+        {
+            return gameLength;
+        }
+
+        /// <summary>
+        /// Setter for gameLength
+        /// </summary>
+        /// <param name="t"></param>
+        public void setTime(string t)
+        {
+            gameLength = t;
+        }        
+
+        /// <summary>
+        /// Getter for opponent name
+        /// </summary>
+        /// <returns></returns>
+        public string getOpponent()
+        {
+            return opponentName;
+        }
+
+        /// <summary>
+        /// Setter for opponent name
+        /// </summary>
+        /// <param name="o"></param>
+        public void setOpponent(string o)
+        {
+            opponentName = o;
+        }
+       
+        /// <summary>
+        /// Event to handle when the server receives a new connection.
+        /// Boolean is true if connection is successful, false if not.
+        /// </summary>
+        public event Action<bool> ConnectionEvent;
+
+        /// <summary>
+        /// Event for when a START line is received from the server
+        /// </summary>
+        public event Action<String> StartLineEvent;
+
+        /// <summary>
+        /// Event for when a TIME line is received from the server
+        /// </summary>
+        public event Action<String> TimeLineEvent;
+
+        /// <summary>
+        /// Event for when a SCORE line is received from the server
+        /// </summary>
+        public event Action<String> ScoreLineEvent;
+
+        /// <summary>
+        /// Event for when a STOP line is received from the server
+        /// </summary>
+        public event Action<String> StopLineEvent;
+
+        /// <summary>
+        /// Event for when a TERMINATED line is received from the server
+        /// </summary>
+        public event Action<String> TerminatedLineEvent;
+
+        /// <summary>
+        /// Event for when a IGNORING line is received from the server
+        /// </summary>
+        public event Action<String> IgnoreLineEvent;
+
+        /// <summary>
+        /// Constructor creates a BoggleClientModel
+        /// </summary>
+        public BoggleClientModel()
+        {
+            socket = null;
+        }
+
+        /// <summary>
+        /// Connect to the server at the given hostname and port and with the give name.
+        /// </summary>
+        public void Connect(string hostname)
+        {
+            // if the socket is not null, just return
+            if (socket != null)
+                return;
+            try
+            {
+                // connect to port 2000 (Boggle Server port)
+                client = new TcpClient(hostname, 2000);
+
+                // if connection is successful, confirm it with a connection event
+                ConnectionEvent(true);
+
+                // if connection works, create a new StringSocket with the client
+                socket = new StringSocket(client.Client, UTF8Encoding.Default);
+
+                // then use socket to begin receiving messages from server
+                socket.BeginReceive(LineReceived, null);
+            }
+            catch(Exception) 
+            {
+                // If there is a problem connecting to the server, send a new connection
+                // event to the view indicating that the connection failed
+                ConnectionEvent(false);
+            }            
+        }
+
+        /// <summary>
+        /// Sends the players's name from the client to the server
+        /// </summary>
+        /// <param name="name"></param>
+        public void SendPlayerName(string name)
+        {
+            // as long as the socket is not null, BeginSend
+            if(!ReferenceEquals(socket, null))
+            {
+                socket.BeginSend("PLAY " + name + "\n", (ex, p) => { }, null);
+            }
+        }
+
+        /// <summary>
+        /// Sends a boggle word from the client to the server
+        /// </summary>
+        /// <param name="word"></param>
+        public void SendWord(String word)
+        {
+            // as long as the socket is not null, BeginSend
+            if (!ReferenceEquals(socket, null))
+            {
+                socket.BeginSend("WORD " + word + "\n", (e, p) => { }, null);
+            }
+        }
+
+        /// <summary>
+        /// Handles an arriving line of text, received from the BoggleServer.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        /// <param name="p"></param>
+        public void LineReceived(String s, Exception e, object p)
+        {            
+            // check what the string starts with and then execute the appropriate 
+            // action in the GUI            
+
+            if(s.StartsWith("START "))
+            {
+                if (!ReferenceEquals(StartLineEvent, null))
+                {
+                    StartLineEvent(s.Substring(6));
+                }
+            }
+            else if (s.StartsWith("TIME "))
+            {
+                if (!ReferenceEquals(TimeLineEvent, null))
+                {
+                    TimeLineEvent(s.Substring(5));
+                }
+            }
+            else if (s.StartsWith("SCORE "))
+            {
+                if (!ReferenceEquals(ScoreLineEvent, null))
+                {
+                    ScoreLineEvent(s.Substring(6));                    
+                }
+            }
+            else if (s.StartsWith("STOP "))
+            {
+                if (!ReferenceEquals(StopLineEvent, null))
+                {
+                    StopLineEvent(s.Substring(5));
+                }
+            }
+            else if (s.StartsWith("TERMINATED"))
+            {
+                //if (!ReferenceEquals(TerminatedLineEvent, null))
+                //{
+                //    TerminatedLineEvent(s.Substring(10));
+                //}
+            }
+            else if (s.StartsWith("IGNORING "))
+            {
+                //if (!ReferenceEquals(IgnoreLineEvent, null))
+                //{
+                //    IgnoreLineEvent(s.Substring(9));
+                //}
+            }           
+            
+            socket.BeginReceive(LineReceived, null);
+        }
+
+        /// <summary>
+        /// Disconnects the client from the boggle server, closes the socket connection
+        /// </summary>
+        public void Disconnect()
+        {
+            // closes the TcpClient
+            client.Close();
+
+            // closes the StringSocket
+            socket.Close();
+        }
+    }
+}

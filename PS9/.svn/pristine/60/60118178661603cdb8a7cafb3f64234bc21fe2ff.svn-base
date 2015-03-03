@@ -1,0 +1,41 @@
+﻿Authors: Basil Vetas and Lance Petersen
+Date: 11/22/14
+
+We decided to use the BoggleBoard class that was provided.
+
+What do we do if there are exceptions? (see ReceiveWordCallback and other callbacks)?
+
+I added string = string.ToUpper() before the PLAY and WORD parts - what do you think?
+Also changed our REGEX to string.StartsWith()
+
+Created a helper method for updating scores - not quite sure where to lock but I think it is
+at the beginnin of this method
+
+I created a Timer variables, and I think we may need to do stuff with it when we stop a game or return
+to make sure the timer gets stopped.
+
+Also added \n to our IGNORING BeginSend calls
+
+-------
+Questions
+
+X How to read the dictionary file
+
+X For server.Stop() do I need to dispose of resources here? Getting an exception
+because of the other thread running after close
+
+How do I add two StringSockets and join the server - is there a way
+to access the console for each connection like SS.Console.WriteLine()?
+
+Are we locking in the right places?
+
+currently we don't use allsockets or user_names - maybe we don't need them and just want to
+keep track of all the Games?
+
+in receiveWordsCallback, what do we do if the exception is not null - return?
+
+How are the initial letters set up? Are they scrambled?
+
+
+
+

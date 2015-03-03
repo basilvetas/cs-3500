@@ -1,0 +1,32 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using BoggleClient;
+using BC;
+
+namespace BoggleClientTest
+{
+    [TestClass]
+    public class BoggleClientTest
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string[] args = { "180", "dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            //new Thread(() => ClientView.MainWindow()).Start();
+            BoggleClientModel player1 = new BoggleClientModel();
+            BoggleClientModel player2 = new BoggleClientModel();
+            player1.ScoreLineEvent += testScore;
+            player1.Connect("localhost");
+            player2.Connect("localhost");
+
+
+        }
+
+        private void testScore(string obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

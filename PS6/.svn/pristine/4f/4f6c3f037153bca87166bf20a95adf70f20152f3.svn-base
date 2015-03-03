@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using SS;
+using System.Text.RegularExpressions;
+
+
+namespace SpreadsheetGUI
+{
+    /// <summary>
+    /// This is a partial class for a spreadsheet Windows Forms Application
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>November 1, 2014</date>
+    public partial class SpreadsheetForm : Form
+    {
+        // Each spreadsheet form will contain a private spreadsheet object
+        private Spreadsheet spreadsheet;
+
+
+        /// <summary>
+        /// Constructor that creates a new spreadsheet form
+        /// </summary>
+        public SpreadsheetForm()
+        {
+            InitializeComponent();
+
+            // default constructor for a new spreadsheet 
+            spreadsheet = new Spreadsheet(IsValidName, s => s.ToUpper(), "ps6");
+        }
+
+        /// <summary>
+        /// Constructor that loads a spreadsheet form from a saved spreadsheet file
+        /// </summary>
+        /// <param name="filepath">Filepath where the spreadsheet is saved</param>
+        public SpreadsheetForm(String filepath)
+        {
+            InitializeComponent();
+
+            // loads a spreadsheet from a file
+            spreadsheet = new Spreadsheet(filepath, IsValidName, s => s.ToUpper(), "ps6");
+        }
+
+        /// <summary>
+        /// Private helper method to check if the name of a cell is valid or not
+        /// </summary>
+        /// <param name="name"></param>
+        private Boolean IsValidName(String name)
+        {            
+            // if it is a valid cell name return true, else return false            
+            if (Regex.IsMatch(name, @"^[a-zA-Z]+[\d]+$"))
+                return true;
+            else return false;
+        }
+        
+        /// <summary>
+        /// Helper method to get the name of the selected cell
+        /// </summary>
+        /// <returns>The name of the selected cell</returns>
+        private String GetCellName()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Helper method to get the value of the selected cell
+        /// </summary>
+        /// <returns>The value of the selected cell</returns>
+        private String GetCellValue()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Helper method to get the contents of the selected cell
+        /// </summary>
+        /// <returns>The contents of the selected cell</returns>
+        private String GetCellContents()
+        {
+            return "";
+        }
+
+        /// <summary>
+        /// Updates the spreadsheet text boxes
+        /// </summary>
+        private void UpdateSpreadsheet()
+        {
+            // get the name of the current cell
+            String cellName = GetCellName();            
+
+            // set the contents of the textbox equal to that cell name
+            cellNameBox.Text = cellName;
+
+
+        }
+
+
+
+
+
+
+
+    }
+}

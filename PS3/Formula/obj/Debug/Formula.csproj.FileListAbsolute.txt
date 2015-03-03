@@ -1,0 +1,6 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\bin\Debug\Formula.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\bin\Debug\Formula.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\bin\Debug\Formula.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\obj\Debug\Formula.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\obj\Debug\Formula.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS3\Formula\obj\Debug\Formula.csprojResolveAssemblyReference.cache

@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FormulaEvaluatorTester
+{
+    /// <summary>
+    ///     EvaluatorTester
+    /// </summary>
+    public class EvaluatorTester
+    {
+        public static void Main(string[] args)
+        {
+            
+
+        }
+    }
+}

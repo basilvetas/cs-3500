@@ -1,0 +1,18 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using BoggleClient;
+
+namespace BoggleClientTest
+{
+    [TestClass]
+    public class BoggleClientTest
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string[] args = { "180", "dictionary.txt" };
+            new BoggleServer.BoggleServer(args);            
+        }
+    }
+}

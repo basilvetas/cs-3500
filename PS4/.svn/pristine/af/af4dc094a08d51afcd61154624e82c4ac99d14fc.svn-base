@@ -1,0 +1,163 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SpreadsheetUtilities;
+
+namespace SS
+{
+    //*** Remember to add XML Documentation and sync into SVN ***//
+
+    /// <summary>
+    /// This class represents a Spreadsheet object that extends the abstract 
+    /// spreadsheet class
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>10-1-2014</date>
+    public class Spreadsheet : AbstractSpreadsheet
+    {
+        List<string> cells;
+
+        /// <summary>
+        /// Constructor creates a new spreadsheet and initialized variables
+        /// </summary>
+        public Spreadsheet()
+        { 
+            // initialize spreadsheet variables;
+            cells = new List<string>();                      
+        }
+
+        /// <summary>
+        /// Enumerates the names of all the non-empty cells in the spreadsheet.
+        /// </summary>
+        public override IEnumerable<String> GetNamesOfAllNonemptyCells()
+        {
+            // cell should contain the names of all non-empty cells
+            return cells;
+        }
+
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns the contents (as opposed to the value) of the named cell.  The return
+        /// value should be either a string, a double, or a Formula.
+        public override object GetCellContents(String name)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, the contents of the named cell becomes number.  The method returns a
+        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// directly or indirectly, on the named cell.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
+        public override ISet<String> SetCellContents(String name, double number)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// If text is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, the contents of the named cell becomes text.  The method returns a
+        /// set consisting of name plus the names of all other cells whose value depends, 
+        /// directly or indirectly, on the named cell.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
+        public override ISet<String> SetCellContents(String name, String text) 
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// If the formula parameter is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, if changing the contents of the named cell to be the formula would cause a 
+        /// circular dependency, throws a CircularException.  (No change is made to the spreadsheet.)
+        /// 
+        /// Otherwise, the contents of the named cell becomes formula.  The method returns a
+        /// Set consisting of name plus the names of all other cells whose value depends,
+        /// directly or indirectly, on the named cell.
+        /// 
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
+        public override ISet<String> SetCellContents(String name, Formula formula)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// If name is null, throws an ArgumentNullException.
+        /// 
+        /// Otherwise, if name isn't a valid cell name, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns an enumeration, without duplicates, of the names of all cells whose
+        /// values depend directly on the value of the named cell.  In other words, returns
+        /// an enumeration, without duplicates, of the names of all cells that contain
+        /// formulas containing name.
+        /// 
+        /// For example, suppose that
+        /// A1 contains 3
+        /// B1 contains the formula A1 * A1
+        /// C1 contains the formula B1 + A1
+        /// D1 contains the formula B1 - C1
+        /// The direct dependents of A1 are B1 and C1
+        /// </summary>
+        protected override IEnumerable<String> GetDirectDependents(String name)
+        {
+            return null;
+        }
+        
+
+        /// <summary>
+        /// This class creates a cell object 
+        /// </summary>
+        private class Cell
+        {
+            // only one of these will be initialized
+            public Object contents { get; set; }
+            public Object value { get; set; }
+
+            string contents_type;
+            string value_type;
+            
+            private Cell(string name)
+            {               
+                contents_type = "string";     
+                value_type = contents_type;
+                contents = name;
+            }
+
+            private Cell(double name)
+            {
+                contents_type = "double";
+                value_type = contents_type;
+                contents = name;
+            }
+
+            private Cell(Formula name)
+            {
+                contents_type = "Formula";
+                //value_type = name.Evaluate.GetType(); -- i want to do something like this
+                contents = name;
+            }
+
+
+        } // END Cell class
+
+    } // END Spreadsheet class
+
+} // END SS Namespace

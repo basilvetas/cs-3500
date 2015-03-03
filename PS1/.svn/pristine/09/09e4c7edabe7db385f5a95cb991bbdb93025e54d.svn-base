@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FormulaEvaluator;
+
+namespace FormulaEvaluatorTester
+{
+    /// <summary>
+    ///     A Console Application for testing the FormulaEvaluator Class Library
+    /// </summary>
+    public class EvaluatorTester
+    {
+        /// <summary>
+        ///     Main method for testing the FormulaEvaluator class
+        /// </summary>
+        /// <param name="args"></param>
+        public static void Main(string[] args)
+        {
+            Evaluator.Evaluate("     (4  *  2 ) - (  1      +        A3 )       ", LookupMethod);
+        }
+
+        /// <summary>
+        ///     A Lookup method to be passed into Evaluate as the delegate method
+        /// </summary>
+        /// <param name="v">The name of the variable</param>
+        /// <returns>The integer value of the variable</returns>
+        public static int LookupMethod(string v)
+        {
+            return 0;
+        }
+    }
+}

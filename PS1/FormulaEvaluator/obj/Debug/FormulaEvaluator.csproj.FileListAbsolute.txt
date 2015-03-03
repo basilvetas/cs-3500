@@ -1,0 +1,6 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\bin\Debug\FormulaEvaluator.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\obj\Debug\FormulaEvaluator.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\obj\Debug\FormulaEvaluator.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluator\obj\Debug\FormulaEvaluator.csprojResolveAssemblyReference.cache

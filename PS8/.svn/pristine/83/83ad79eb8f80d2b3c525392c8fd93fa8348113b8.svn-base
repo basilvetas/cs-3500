@@ -1,0 +1,52 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using BoggleServer;
+using System.Threading;
+using System.Net.Sockets;
+using System.Text;
+using CustomNetworking;
+
+
+namespace BoggleServerTest
+{
+    /// <summary>
+    /// Unit tests for our BoggleServer
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    [TestClass]
+    public class BoggleServerTest
+    {
+        /// <summary>
+        /// Starts a new server with two arguments, stops it, and then starts a new server
+        /// with three arguments, and stops it.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string[] twoArgs = { "200", "../../../Resources/dictionary.txt" };
+            BoggleServer.BoggleServer twoArgServer = new BoggleServer.BoggleServer(twoArgs);            
+            twoArgServer.Stop();
+
+            string[] threeArgs = { "200", "../../../Resources/dictionary.txt", "jimiergsatnesaps" };
+            BoggleServer.BoggleServer threeArgServer = new BoggleServer.BoggleServer(threeArgs);
+            threeArgServer.Stop();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestMethod]
+        public void TestMethod2()
+        {
+            string[] args = { "200", "../../../Resources/dictionary.txt" };
+            BoggleServer.BoggleServer server = new BoggleServer.BoggleServer(args);
+            TcpClient client = new TcpClient("localhost", 2001);
+            Socket clientSocket = client.Client;
+            StringSocket playerOne = new StringSocket(clientSocket, new UTF8Encoding());
+
+        }
+
+        // Note: whenever we create new StringSocket connections, use a unique port
+    }
+}

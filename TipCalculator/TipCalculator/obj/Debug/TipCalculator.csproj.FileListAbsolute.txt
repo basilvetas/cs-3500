@@ -1,0 +1,9 @@
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\bin\Debug\TipCalculator.exe.config
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\bin\Debug\TipCalculator.exe
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\bin\Debug\TipCalculator.pdb
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.Form1.resources
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.Properties.Resources.resources
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.csproj.GenerateResource.Cache
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.exe
+c:\users\basil\documents\visual studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculator\obj\Debug\TipCalculator.csprojResolveAssemblyReference.cache

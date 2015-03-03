@@ -1,0 +1,8 @@
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\bin\Debug\SpreadsheetPanel.XML
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\bin\Debug\SpreadsheetPanel.dll
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\bin\Debug\SpreadsheetPanel.pdb
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\obj\x86\Debug\SpreadsheetPanel.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\obj\x86\Debug\SS.Properties.Resources.resources
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\obj\x86\Debug\SpreadsheetPanel.csproj.GenerateResource.Cache
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\obj\x86\Debug\SpreadsheetPanel.dll
+C:\Users\Basil\Desktop\PS6Skeleton\SpreadsheetPanel\obj\x86\Debug\SpreadsheetPanel.pdb

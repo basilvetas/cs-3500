@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CustomNetworking;
+using System.Net.Sockets;
+
+namespace BoggleServer
+{
+    /// <summary>
+    /// This program creates the server side of our Boggle game. Update
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    class BoggleServer
+    {
+        // Listens for incoming connections
+        private TcpListener server;
+
+        // One StringSocket per connected client
+        private List<StringSocket> allSockets;
+
+        // the name associated with the socket
+        private List<string> user_names;
+
+        /// <summary>
+        /// Will set up the Boggle Server
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            int parameters;
+
+            if (args.Length == 2)
+                parameters = 2;
+            else if (args.Length == 3)
+                parameters = 3;
+            else return; // Do something here to STOP
+
+            int timer;
+            string pathname;
+            string initBoggleBoard;
+
+            // if the first arg is an int, get it as our timer
+            if (int.TryParse(args[0], out timer)) { }
+            else return; // Do something here to STOP                      
+
+            pathname = args[1];
+
+            // if there are three parameters, use it, otherwise set it to null
+            if (parameters == 3)
+                initBoggleBoard = args[2];
+            else initBoggleBoard = null;
+
+            new BoggleServer(timer, pathname, initBoggleBoard);
+        }
+
+        /// <summary>
+        /// Create a Boggle Server.
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="pathname"></param>
+        /// <param name="initBoggleBoard"></param>
+        private BoggleServer (int timer, string pathname, string initBoggleBoard)
+        {
+
+        }
+    }
+}

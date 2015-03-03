@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringSocket", "StringSocket\StringSocket.csproj", "{8E503579-ED62-438B-B391-44AD56829B97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringSocketTester", "StringSocketTester\StringSocketTester.csproj", "{AEBAF099-7D2E-4911-9324-63574E5A89D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D4370881-4A54-4ED0-BA07-1B7A945E89C4}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		PS7.vsmdi = PS7.vsmdi
+		PS71.vsmdi = PS71.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E503579-ED62-438B-B391-44AD56829B97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E503579-ED62-438B-B391-44AD56829B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E503579-ED62-438B-B391-44AD56829B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E503579-ED62-438B-B391-44AD56829B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEBAF099-7D2E-4911-9324-63574E5A89D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEBAF099-7D2E-4911-9324-63574E5A89D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEBAF099-7D2E-4911-9324-63574E5A89D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEBAF099-7D2E-4911-9324-63574E5A89D6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = PS7Skeleton1.vsmdi
+	EndGlobalSection
+EndGlobal

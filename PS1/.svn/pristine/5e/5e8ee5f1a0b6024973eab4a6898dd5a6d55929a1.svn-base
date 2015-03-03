@@ -1,0 +1,229 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace FormulaEvaluator
+{
+    /// <summary>
+    ///     A public static class for evaluating arithmetic expressions
+    /// </summary>
+    public static class Evaluator
+    {
+        /// <summary>
+        ///     Delegate Lookup function for variables in an arithmetic expression
+        /// </summary>
+        /// <param name="v">The name of the variable</param>
+        /// <returns>An integer value for the variable</returns>
+        public delegate int Lookup(String v);
+
+        /// <summary>
+        ///     Evaluates an arithmetic expression
+        /// </summary>
+        /// <param name="exp">The arithmetic expression to be evaluated</param>
+        /// <param name="variableEvaluator">A LookUp method passed in as a variable</param>
+        /// <returns>Returns an integer result</returns>
+        public static int Evaluate(String exp, Lookup variableEvaluator)
+        {
+
+            // Splits string into tokens in an array
+            string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+         
+            for(int i = 0; i < substrings.Length; i++)
+            {   
+                //remove whitespace
+                String trimmed = substrings[i].Trim();
+                substrings[i] = trimmed;
+
+               // Console.Write(substrings[i]); // should write the correct arithmetic expression
+            }
+
+            Stack<int> values = new Stack<int>();
+            Stack<String> operators = new Stack<String>();
+
+            for(int j = 0; j < substrings.Length; j++)
+            {
+                String t = substrings[j]; // current token
+                double number; // will hold parsed double value before casting to int
+                
+                if (t.Equals(""))
+                    continue;
+                // check if t is an operator
+                if(t.Equals("*") || t.Equals("/") || t.Equals("("))
+                {
+                    operators.Push(t);
+                }
+                else if(t.Equals("+") || t.Equals("-") || t.Equals(")"))
+                {                  
+                    String top = "";
+                    if(operators.Count > 0)
+                        top = operators.Peek();
+                    if(top.Equals("+") || top.Equals("-"))
+                    {  
+                        if (values.Count < 2)
+                            throw new ArgumentException();
+
+                        int first_val = values.Pop();
+                        int second_val = values.Pop();
+                        String operation = operators.Pop();
+                        int result;
+                        // run the operation on values, check if it is + or -
+                        if(operation.Equals("+"))                        
+                            result = second_val + first_val;                        
+                        else                       
+                            result = second_val - first_val;                                             
+                        values.Push(result);
+                    }
+
+                    if(t.Equals(")"))
+                    {
+                        String new_top = "";
+                        if(operators.Count > 0)
+                            new_top = operators.Peek();
+
+                        if (!(new_top.Equals("(")))
+                            throw new ArgumentException();
+
+                        operators.Pop(); // should be a "("
+
+                        if(operators.Count > 0)
+                            new_top = operators.Peek();
+
+                        if(new_top.Equals("*") || new_top.Equals("/"))
+                        {
+                            if (values.Count < 2)
+                                throw new ArgumentException();
+
+                            int first_val = values.Pop();
+                            int second_val = values.Pop();
+                            String operation = operators.Pop();
+                            int result;                            
+                            // run the operation on values, check if it is * or /
+                            if (operation.Equals("*"))
+                                result = second_val * first_val;
+                            else
+                            {
+                                if (first_val == 0)
+                                    throw new ArgumentException();
+                                result = second_val / first_val;
+                            }
+                            values.Push(result);
+                        }
+                    }
+                    else // if t is not a ")", push it onto the stack
+                        operators.Push(t);
+                } 
+                // if t not an operator, check if it is an integer or variable
+                else if(Double.TryParse(t, out number)) // if it is parsable, will return true
+                {                   
+                    int token = (int) number; // number will hold the token value as a double
+
+                    String top = "";
+                    if(operators.Count > 0)
+                        top = operators.Peek();
+
+                    if (top.Equals("*") || top.Equals("/"))
+                    {
+                        int first_val = values.Pop();
+                        String operation = operators.Pop();
+                        int result;
+                        if (operation.Equals("*"))
+                            result = first_val * token;
+                        else
+                        {
+                            if (token == 0)
+                                throw new ArgumentException();
+                            result = first_val / token;
+                        }                            
+                        values.Push(result);
+                    }
+                    else
+                        values.Push(token);              
+                }
+                else // otherwise t must be a variable
+                {                    
+                    // check if t is a proper variable or if it is an illegal form throw exception
+                    for(int i = 0; i < t.Length; i++)
+                    {
+                        // if the var candidate is not a letter or digit, throw exception
+                        char current = t[i];
+                        if (!(char.IsLetter(current)) && !(char.IsDigit(current)))
+                            throw new ArgumentException();
+
+                        // if first character is not a letter, throw exception
+                        if ((i == 0) && !(char.IsLetter(current)))                            
+                            throw new ArgumentException();
+                        
+                        // once a digit is reached, if any of the subsequent chars are not digits, throw exception
+                        if(char.IsDigit(current))
+                        {
+                            for(int k = i; k < t.Length; k++)
+                            {
+                                char next = t[k];
+                                if (!(char.IsDigit(next)))
+                                    throw new ArgumentException();
+                            }
+                        }
+
+                        // if loop reaches the end and there is no digit, throw exception
+                        if((i == t.Length) && !(char.IsDigit(current)))
+                            throw new ArgumentException();
+                           
+                    } // end variable check
+
+                    int token = variableEvaluator(t); // lookup value of t to use as the token value
+
+                    String top = "";
+                    if(operators.Count > 0)
+                        top = operators.Peek();
+
+                    if (top.Equals("*") || top.Equals("/"))
+                    {
+                        int first_val = values.Pop();
+                        String operation = operators.Pop();
+                        int result;
+                        if (operation.Equals("*"))
+                            result = first_val * token;
+                        else
+                        {
+                            if (token == 0)
+                                throw new ArgumentException();
+                            result = first_val / token;
+                        }                            
+                        values.Push(result);
+                    }
+                    else
+                        values.Push(token);   
+ 
+                } // end 'if-else statement'
+
+            } // end 'for loop'
+
+            if(operators.Count == 0) // if operators stack is empty
+            {
+                // there should only be one value left on the values stack
+                return values.Pop(); 
+            }
+            else
+            {
+                // there should be exactly one operator left on the stack, and it should
+                // be either + or -. There should be exactly two values in the value stack.
+                int first_val = values.Pop();
+                int second_val = values.Pop();
+                String operation = operators.Pop();
+                int result;
+                if (operation.Equals("+"))
+                    result = second_val + first_val;
+                else
+                    result = second_val - first_val;
+                return result;
+            }            
+
+        } // end 'Evaluate' method 
+  
+    } // end 'Evaluator' class
+
+} // end 'FormulaEvaluator' namespace

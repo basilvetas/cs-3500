@@ -1,0 +1,226 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using SS;
+using System.Text.RegularExpressions;
+using SpreadsheetUtilities;
+
+namespace SpreadsheetGUI
+{
+    /// <summary>
+    /// This is a partial class for a spreadsheet Windows Forms Application
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>November 1, 2014</date>
+    public partial class SpreadsheetForm : Form
+    {
+        // Each spreadsheet form will contain a private spreadsheet object
+        private Spreadsheet spreadsheet;
+
+
+        /// <summary>
+        /// Constructor that creates a new spreadsheet form
+        /// </summary>
+        public SpreadsheetForm()
+        {
+            InitializeComponent();
+
+            // default constructor for a new spreadsheet 
+            spreadsheet = new Spreadsheet(IsValidName, s => s.ToUpper(), "ps6");
+
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += NewSelection;
+        }
+
+        /// <summary>
+        /// Constructor that loads a spreadsheet form from a saved spreadsheet file
+        /// </summary>
+        /// <param name="filepath">Filepath where the spreadsheet is saved</param>
+        public SpreadsheetForm(String filepath)
+        {
+            InitializeComponent();            
+
+            // loads a spreadsheet from a file
+            spreadsheet = new Spreadsheet(filepath, IsValidName, s => s.ToUpper(), "ps6");
+            
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += NewSelection;
+        }
+
+        /// <summary>
+        /// Private helper method to check if the name of a cell is valid or not
+        /// </summary>
+        /// <param name="name"></param>
+        private Boolean IsValidName(String name)
+        {            
+            // if it is a valid cell name return true, else return false            
+            if (Regex.IsMatch(name, @"^[a-zA-Z]+[\d]+$"))
+                return true;
+            else return false;
+        }
+        
+        /// <summary>
+        /// Helper method to get the name of the selected cell
+        /// </summary>
+        /// <returns>The name of the selected cell</returns>
+        private String GetCellName()
+        {            
+            // get the row and the column of selected cell from panel
+            int col, row;
+            spreadsheetPanel1.GetSelection(out col, out row);            
+            // for rows we want to start a 1 instead of 0 so add 1 to each term
+            int cellRow = 1 + row;
+            // since 'A' = 01000001 in binary, and col counts from 0 (0000), 1 (0001), 2 (0010)...
+            // then if we keep adding the next number to A the binary addition takes us from A-Z
+            char cellCol = (char)('A' + col);                        
+            return "" + cellCol + cellRow;            
+        }
+
+        /// <summary>
+        /// Helper method that updates the spreadsheet, including the text boxes that display
+        /// the cell name, value, and content, and also the cell value displayed in the cell itself
+        /// </summary>
+        private void UpdateSpreadsheet()
+        {
+            // get the name, content, and value of the current cell            
+            String cellName = GetCellName();
+            Object cellContents = spreadsheet.GetCellContents(cellName);
+            Object cellValue = spreadsheet.GetCellValue(cellName);
+
+            // set the contents of the textbox equal to that cell name            
+            cellNameBox.Text = cellName;
+
+            // if the cell content is a Formula, add the '=' back on
+            if (spreadsheet.GetCellContents(cellName) is Formula)
+                cellContentsBox.Text = "=" + cellContents.ToString();
+            else // otherwise just set the textbox equal to the content
+                cellContentsBox.Text = cellContents.ToString();
+
+            // check if the cell value is a formula error, say so
+            if (spreadsheet.GetCellValue(cellName) is FormulaError)
+                cellValueBox.Text = "Formula Error";
+            else // otherwise just set the textbox equal to the value
+                cellValueBox.Text = cellValue.ToString();                           
+        }
+
+        /// <summary>
+        /// This is a helper method that will update the spreadsheet when a new cell is selected
+        /// </summary>
+        /// <param name="ss"></param>
+        /// <citation>PS6 Skeleton 'Demo' class</citation>
+        private void NewSelection(SpreadsheetPanel ss)
+        {
+            UpdateSpreadsheet();       
+        }
+
+        /// <summary>
+        /// This is a helper method that will evaluate a cell's value after the 'Evaluate' button 
+        /// is pressed and content has been added to the formula textbox. 
+        /// </summary>
+        /// <param name="e">the event</param>
+        /// <param name="sender">default</param>
+        private void evaluateButton_Click(object sender, EventArgs e)
+        {
+            ISet<String> dependents = null; // will hold dependents of selected cell
+
+            try
+            {
+                // try to add the cell name and cell content as a new cell in the spreadsheet
+                // if it works, save the returned list of dependents
+                dependents = spreadsheet.SetContentsOfCell(cellNameBox.Text, cellContentsBox.Text);            
+            }
+            catch(FormulaFormatException) 
+            {
+                // if exception is caught, print message
+                MessageBox.Show("Error: You have entered an invalid formula. Your changes will"
+                + " be reverted and the formula will not be saved.");                
+            }  
+            catch(CircularException)
+            {
+                // if exception is caught, print message
+                MessageBox.Show("Error: A circular reference occurred. Some change you have made" 
+                    + " to the currently selected cell was invalid. All changes will be reverted.");                                
+            }
+
+            // update at the end before ending method
+            UpdateSpreadsheet();     
+            
+            // need to deal with what happens if the evaluate creates a formula error and another 
+            // cell references that formula error
+
+            
+            // if dependents is null (meaning an exception was thrown above), or if the currently
+            // selected cells value is a Formula error, then we don't want to update dependents so return
+            if ((ReferenceEquals(dependents, null)) || (spreadsheet.GetCellValue(GetCellName()) is FormulaError))
+                return;                    
+
+            // for each cell in dependents, update it
+            foreach (string d in dependents)
+                UpdateCell(d);
+        }
+
+        /// <summary>
+        /// Helper method so that we can press 'return' or 'enter' and it will operate
+        /// like we have pressed the evaluate button
+        /// </summary>
+        /// <param name="sender">default</param>
+        /// <param name="e">the key event</param>
+        private void cellContentsBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // if the key that was pressed is the return key "\r"
+            if (e.KeyChar.Equals('\r')) // then evaluate the formula box
+                evaluateButton_Click(sender, e);    
+        }
+
+        /// <summary>
+        /// Helper method that will update cell dependents when their parent cell gets changed 
+        /// </summary>
+        /// <param name="cellName">The name of the cell to update</param>
+        private void UpdateCell(string cellName)
+        {
+            // data needed to update cell
+            int cellColIndex;
+            int cellRowIndex;
+            string cellValue;
+
+            // get the column letter and convert it to the numerical index
+            cellColIndex = cellName.ToCharArray(0,1)[0] - 'A';
+
+            // parse the remainder of the string as an int in order to 
+            // get the row number and convert it to the numberical index            
+            int.TryParse(cellName.Substring(1), out cellRowIndex);
+            cellRowIndex--;
+
+            // check if the cells value is a formula error, if it is say so
+            if (spreadsheet.GetCellValue(cellName) is FormulaError)
+                cellValue = "Formula Error";
+            else // otherwise, set cellValue to the cell's value 
+                cellValue = spreadsheet.GetCellValue(cellName).ToString();
+
+            // update the value of the cell
+            spreadsheetPanel1.SetValue(cellColIndex, cellRowIndex, cellValue);
+        }
+
+        
+        
+
+
+
+
+
+
+
+    }
+}

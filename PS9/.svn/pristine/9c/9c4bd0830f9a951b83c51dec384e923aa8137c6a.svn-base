@@ -1,0 +1,43 @@
+﻿<Page x:Class="BC.GamePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+	Title="GamePage">
+
+    <Grid Margin="0,0,-393,-464">
+        <TextBlock x:Name="Title" HorizontalAlignment="Left" Margin="317,22,0,0" TextWrapping="Wrap" Text="Boggle" VerticalAlignment="Top" FontSize="30" Width="107"/>
+
+        <TextBlock x:Name="PlayerName" HorizontalAlignment="Left" Height="34" Margin="236,76,0,0" TextWrapping="Wrap" Text="Player Name: " VerticalAlignment="Top" Width="114" FontSize="16" RenderTransformOrigin="0.5,0.471"/>
+        <TextBlock x:Name="OpponentName" HorizontalAlignment="Left" Height="28" Margin="236,109,0,0" TextWrapping="Wrap" Text="Opponent Name: " VerticalAlignment="Top" Width="135" FontSize="16"/>
+        <TextBox x:Name="Player" HorizontalAlignment="Left" Height="28" Margin="371,76,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="116" FontSize="16"/>
+        <TextBox x:Name="Opponent" HorizontalAlignment="Left" Height="28" Margin="371,109,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="116" FontSize="16"/>
+        <TextBlock x:Name="TimeRemaining" HorizontalAlignment="Left" Height="28" Margin="534,165,0,0" TextWrapping="Wrap" Text="Time Remaining:" VerticalAlignment="Top" Width="129" FontSize="16"/>
+        <TextBox x:Name="Timer" HorizontalAlignment="Left" Height="28" Margin="534,198,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="129" FontSize="16"/>
+        <TextBlock x:Name="Scores" HorizontalAlignment="Left" Height="28" Margin="76,165,0,0" TextWrapping="Wrap" Text="Scores" VerticalAlignment="Top" Width="79" FontSize="20" TextDecorations="Underline"/>
+        <TextBlock x:Name="PlayerScore" HorizontalAlignment="Left" Height="23" Margin="10,203,0,0" TextWrapping="Wrap" Text="Player: " VerticalAlignment="Top" Width="114" FontSize="16"/>
+        <TextBlock x:Name="OpponentScore" HorizontalAlignment="Left" Height="26" Margin="10,253,0,0" TextWrapping="Wrap" Text="Opponent: " VerticalAlignment="Top" Width="114" FontSize="16"/>
+        <TextBox x:Name="PlayerScoreCount" HorizontalAlignment="Left" Height="28" Margin="95,202,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="116" FontSize="16"/>
+        <TextBox x:Name="OpponentScoreCount" HorizontalAlignment="Left" Height="28" Margin="95,251,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="116" FontSize="16"/>
+        <TextBlock x:Name="Words" HorizontalAlignment="Left" Height="28" Margin="216,400,0,0" TextWrapping="Wrap" Text="Word: " VerticalAlignment="Top" Width="79" FontSize="20" TextDecorations="{x:Null}"/>
+        <TextBox x:Name="WordsEntered" HorizontalAlignment="Left" Height="28" Margin="295,400,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="221" FontSize="16"/>
+        <TextBox x:Name="Cell1" HorizontalAlignment="Left" Height="50" Margin="257,153,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell2" HorizontalAlignment="Left" Height="50" Margin="312,153,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell3" HorizontalAlignment="Left" Height="50" Margin="367,153,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell4" HorizontalAlignment="Left" Height="50" Margin="422,153,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell5" HorizontalAlignment="Left" Height="50" Margin="257,208,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell6" HorizontalAlignment="Left" Height="50" Margin="312,208,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell7" HorizontalAlignment="Left" Height="50" Margin="367,208,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell8" HorizontalAlignment="Left" Height="50" Margin="422,208,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell9" HorizontalAlignment="Left" Height="50" Margin="257,263,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell10" HorizontalAlignment="Left" Height="50" Margin="312,263,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell11" HorizontalAlignment="Left" Height="50" Margin="367,263,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell12" HorizontalAlignment="Left" Height="50" Margin="422,263,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell13" HorizontalAlignment="Left" Height="50" Margin="257,318,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell14" HorizontalAlignment="Left" Height="50" Margin="312,318,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell15" HorizontalAlignment="Left" Height="50" Margin="367,318,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+        <TextBox x:Name="Cell16" HorizontalAlignment="Left" Height="50" Margin="422,318,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="50" FontSize="24" TextAlignment="Center"/>
+    </Grid>
+</Page>

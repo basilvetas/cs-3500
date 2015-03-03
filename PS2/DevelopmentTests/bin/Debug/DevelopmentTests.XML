@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DevelopmentTests</name>
+    </assembly>
+    <members>
+        <member name="T:PS2GradingTests.DependencyGraphTest">
+             <summary>
+            This is a test class for DependencyGraphTest and is intended
+            to contain all DependencyGraphTest Unit Tests
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest1">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest2">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest3">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest4">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest5">
+             <summary>
+            Removing from an empty DG shouldn't fail
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest6">
+             <summary>
+            Replace on an empty DG shouldn't fail
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest7">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest8">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest9">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest10">
+             <summary>
+            Empty graph should contain nothing
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest11">
+             <summary>
+            Removing from an empty DG shouldn't fail
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.EmptyTest12">
+             <summary>
+            Replace on an empty DG shouldn't fail
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.StaticTest1">
+            <summary>
+            It should be possibe to have more than one DG at a time.  This test is
+            repeated because I want it to be worth more than 1 point.
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest1">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest2">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest3">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest4">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest5">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest6">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest7">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest8">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest9">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest10">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest11">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest12">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest13">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest14">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest15">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest16">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest17">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest18">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest19">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.NonEmptyTest20">
+             <summary>
+            Non-empty graph contains something
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.StressTest1">
+             <summary>
+            Using lots of data
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.StressTest8">
+             <summary>
+            Using lots of data with replacement
+            </summary>
+        </member>
+        <member name="M:PS2GradingTests.DependencyGraphTest.StressTest15">
+             <summary>
+            Using lots of data with replacement
+            </summary>
+        </member>
+    </members>
+</doc>

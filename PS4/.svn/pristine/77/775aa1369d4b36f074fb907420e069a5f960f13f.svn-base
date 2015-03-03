@@ -1,0 +1,35 @@
+﻿Name: Basil Vetas
+Date: 10-1-2014
+
+Notes:
+
+For the Cell class, I want it to have the following properties:
+	- String contents
+	- String value
+	- String row
+	- String column
+	- (or maybe just a 'name' for both row and column)
+	- may want a helper variable to indicate if it is a string, double, or formula
+	- String content_type: either a 'string'; a 'double'; or a 'Formula' or an empty string ""
+	- Note: if the content_type is an empty string, we say the cell is empty
+	- Note: cells are initialized to an empty string
+	- String value_type can be either a 'string'; a 'double'; or a 'FormulaError'
+	- If content_type = 'double' then value_type = 'double'
+	- If content_type = 'string' then value_type = 'string'
+	- If content_type = 'Formula' then value_type = 'double' or 'FormulaError' (Based on Evaluate method)
+	- (the values of variables can also only be 'double' or 'undefined' if FormulaError since they reference other cell values)
+	s
+	
+
+One method return all its direct and indirect dependents - call the
+prewritten method
+
+Questions for TA:
+
+Do I wanted the Properties -> Build -> XML documentation file box checked
+	for the Resources project?
+I wanted it checked for the others right?
+
+Where do I find my .dll files / which should I be adding to Resources -> Libraries?
+
+

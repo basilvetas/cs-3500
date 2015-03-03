@@ -1,0 +1,242 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SS;
+using SpreadsheetUtilities;
+using System.Collections.Generic;
+
+namespace SpreadsheetTests
+{
+    /// <summary>
+    /// Test class for PS5. NEED TO COPY OVER RELEVANT TESTS FROM PS4. I assume
+    /// that the implementation of PS4 used in Spreadsheet passes 100% of the grading tests for PS4,
+    /// which is true because I have made all necessary corrections to my PS4 assignment. 
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>10-6-2014</date>
+    [TestClass]
+    public class SpreadsheetTests
+    {
+        /// <summary>
+        ///     Tests if all the constructors work. This test simply assumes that an error will
+        ///     not be thrown for any of the constructors.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod0()
+        {
+            AbstractSpreadsheet sheet1 = new Spreadsheet();
+            AbstractSpreadsheet sheet2 = new Spreadsheet(s => true, s => s.ToUpper(), "1.0");
+            //AbstractSpreadsheet sheet3 = new Spreadsheet(PathToFile, s => true, s => s.ToUpper(), "1.0");            
+        }
+
+        // --------- Exception Tests ------------ //
+
+        /// <summary>
+        ///     Tests if cell name for GetCellValue is null
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod1()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.GetCellValue(null);
+        }
+
+        /// <summary>
+        ///     Tests if cell name for GetCellValue is invalid
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod2()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            object value = sheet.GetCellValue("1$#*&%1");
+        }
+
+        /// <summary>
+        ///     Tests SetContentsOfCell for a null content parameter
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod7()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", null);
+        }
+
+        /// <summary>
+        ///     Tests SetContentsOfCell for a null name parameter
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod8()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell(null, "hello");
+        }
+
+        /// <summary>
+        ///     Tests SetContentsOfCell for an invalid name parameter
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod9()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("1111111", "hello");
+        }
+
+        /// <summary>
+        ///     Tests SetContentsOfCell for an invalid formula exception
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestMethod10()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=$%^302045 ++ 2)");
+        }
+
+        /// <summary>
+        ///     Tests SetContentsOfCell for an invalid formula exception
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(CircularException))]
+        public void TestMethod11()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=A1");
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expected a double given a double.
+        ///     Also tests SetContentsOfCell given a double (as a string).
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod14()
+        {
+            Spreadsheet sheet = new Spreadsheet(s => false, s => s.ToUpper(), "default");
+            sheet.SetContentsOfCell("A1", "5");
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual(5.0, value);
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expected a double given a double.
+        ///     Also tests SetContentsOfCell given a double (as a string).
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestMethod15()
+        {
+            Spreadsheet sheet = new Spreadsheet(check_var, s => s.ToUpper(), "default");
+            sheet.SetContentsOfCell("A1", "=B1");
+            sheet.SetContentsOfCell("B1", "5");
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual(5.0, value);
+        }
+        
+        bool valid = true;
+
+        /// <summary>
+        ///     helper delegate method
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public bool check_var(string s)
+        {
+            // will switch off each time if it is true or false
+            if (valid)
+            {
+                valid = false;
+                return true;
+            }
+            else return false;
+            
+        }
+
+        // --------- Non-Exception Tests ------------ //
+
+        /// <summary>
+        ///     Tests GetCellValue, expects a string given a string.
+        ///     Also tests SetContentsOfCell given a string.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod3()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "hello");
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual("hello", value);
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expected a double given a double.
+        ///     Also tests SetContentsOfCell given a double (as a string).
+        /// </summary>
+        [TestMethod]
+        public void TestMethod4()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "5");
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual(5.0, value);
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expects a double given a formula.
+        ///     Also tests SetContentsOfCell given a formula (as a string).
+        /// </summary>
+        [TestMethod]
+        public void TestMethod5()
+        {
+            Spreadsheet sheet = new Spreadsheet(s => true, s => s, "default");
+            sheet.SetContentsOfCell("D1", "1");
+            sheet.SetContentsOfCell("E1", "1");
+            sheet.SetContentsOfCell("F1", "3");            
+            sheet.SetContentsOfCell("B1", "=D1 + E1");
+            sheet.SetContentsOfCell("C1", "=F1");
+            sheet.SetContentsOfCell("A1", "=B1 + C1");
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual(5.0, value);
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expects a SpreadsheetUtilities.FormulaError given a formula.
+        ///     Also tests SetContentsOfCell given a formula (as a string). 
+        /// </summary>
+        [TestMethod]
+        public void TestMethod6()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=B1 + C1");
+            object value = sheet.GetCellValue("A1");
+            Assert.IsInstanceOfType(value, typeof(FormulaError));
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expects a SpreadsheetUtilities.FormulaError given a formula.
+        ///     Also tests SetContentsOfCell given a formula (as a string). 
+        /// </summary>
+        [TestMethod]
+        public void TestMethod12()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("B1", "hello");
+            sheet.SetContentsOfCell("A1", "=B1");
+            object value = sheet.GetCellValue("A1");
+            Assert.IsInstanceOfType(value, typeof(FormulaError));
+        }
+
+        /// <summary>
+        ///     Tests GetCellValue, expects an empty string
+        /// </summary>
+        [TestMethod]
+        public void TestMethod13()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            object value = sheet.GetCellValue("A1");
+            Assert.AreEqual("", value);
+        }
+    }
+}

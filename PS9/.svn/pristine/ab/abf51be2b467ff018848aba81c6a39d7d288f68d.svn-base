@@ -1,0 +1,112 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace BC
+{
+    /// <summary>
+    /// Interaction logic for GamePage.xaml
+    /// </summary>
+    public partial class GamePage : Page
+    {
+        /// <summary>
+        /// Model to allow this page to interact with data (passed in as a parameter)
+        /// </summary>
+        private BoggleClientModel model;
+
+        private string board;
+
+        /// <summary>
+        /// This is the page where most of the game will happen.
+        /// </summary>
+        /// <param name="model"></param>
+        public GamePage(BoggleClientModel model)
+        {
+            InitializeComponent();
+            this.model = model;
+
+            model.TimeLineEvent += TimeReceived;
+            model.ScoreLineEvent += ScoreReceived;
+            model.StopLineEvent += StopReceived;
+            model.TerminatedLineEvent += TerminatedReceived;
+            model.IgnoreLineEvent += IgnoreReceived;
+        }
+
+        /// <summary>
+        /// Used to initalize the grid with the Boggle board.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DataGrid_Loaded (object sender, RoutedEventArgs e)
+        {
+            //A getBoard method should exist in the Model, because the model should 
+            //have a "model" of the game as it is happening.
+            //var dice = model.getBoard;
+
+            var dice = new List<string>();
+            dice.Add("A");
+            dice.Add("B");
+            dice.Add("C");
+            dice.Add("D");
+
+            var grid = sender as DataGrid;
+            grid.ItemsSource = dice;
+        }
+
+        /// <summary>
+        /// Handle when the server sends information about the timer.
+        /// </summary>
+        /// <param name="line"></param>
+        private void TimeReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// Handle when the server sends information about the score.
+        /// </summary>
+        /// <param name="line"></param>
+        private void ScoreReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="line"></param>
+        private void StopReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="line"></param>
+        private void TerminatedReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="line"></param>
+        private void IgnoreReceived(String line)
+        {
+
+        }
+    }
+}

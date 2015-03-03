@@ -1,0 +1,132 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using BoggleServer;
+using System.Threading;
+using System.Net.Sockets;
+using System.Text;
+using CustomNetworking;
+
+
+namespace BoggleServerTest
+{
+    /// <summary>
+    /// Unit tests for our BoggleServer
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    [TestClass]
+    public class BoggleServerTest
+    {
+        /// <summary>
+        /// Starts a new server with two arguments, stops it, and then starts a new server
+        /// with three arguments, and stops it.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod1()
+        {
+            BoggleServer.BoggleServer twoArgServer = null;
+            BoggleServer.BoggleServer threeArgServer = null;
+
+            try
+            {
+                // make boggle with 2 arguments
+                string[] twoArgs = { "200", "../../../Resources/dictionary.txt" };
+                twoArgServer = new BoggleServer.BoggleServer(twoArgs);
+            }
+            finally
+            {
+                // close the server
+                twoArgServer.Stop();                
+            }
+
+            try
+            {
+                // make boggle with 3 arguments
+                string[] threeArgs = { "200", "../../../Resources/dictionary.txt", "jimiergsatnesaps" };
+                threeArgServer = new BoggleServer.BoggleServer(threeArgs);            
+            }
+            finally 
+            {
+                // close the server
+                threeArgServer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// A simple test for BoggleServer for a single player connection
+        ///</summary>
+        [TestMethod()]
+        public void TestMethod2()
+        {
+            new Test2Class().run();
+        }
+
+        public class Test2Class
+        {
+            // Data that is shared across threads
+            private ManualResetEvent mre;            
+
+            public void run()
+            {
+                BoggleServer.BoggleServer server = null;
+                TcpClient client = null;               
+
+                try
+                {
+                    string[] args = { "200", "../../../Resources/dictionary.txt" };
+                    server = new BoggleServer.BoggleServer(args);
+
+                    // create player one connection
+                    client = new TcpClient("localhost", 2001);
+                    Socket clientSocket = client.Client;
+                    StringSocket player = new StringSocket(clientSocket, new UTF8Encoding());
+
+                    mre = new ManualResetEvent(false);
+
+                    // have player one join the boggle game
+                    player.BeginSend("PLAY Basil\n", (o, e) => { mre.Set(); }, null);
+
+                    Assert.IsTrue(mre.WaitOne(1000));
+                }
+                finally 
+                {
+                    server.Stop();
+                    client.Close();
+                }
+                     
+            }
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestMethod]
+        public void TestMethod3()
+        {
+            string[] args = { "200", "../../../Resources/dictionary.txt" };
+            BoggleServer.BoggleServer server = new BoggleServer.BoggleServer(args);
+
+            // create player one connection
+            TcpClient clientOne = new TcpClient("localhost", 2001);
+            Socket clientOneSocket = clientOne.Client;
+            StringSocket playerOne = new StringSocket(clientOneSocket, new UTF8Encoding());
+            
+            // create player two connection
+            TcpClient clientTwo = new TcpClient("localhost", 2001);
+            Socket clientTwoSocket = clientTwo.Client;
+            StringSocket playerTwo = new StringSocket(clientTwoSocket, new UTF8Encoding());
+
+            ManualResetEvent mre1 = new ManualResetEvent(false);
+            ManualResetEvent mre2 = new ManualResetEvent(false);
+
+            // have player one join the boggle game
+            playerOne.BeginSend("PLAY Basil\n", (o, e) => {mre1.Set();}, null);
+
+            // have player two join the boggle game
+            playerTwo.BeginSend("PLAY Lance\n", (o, e) => { mre2.Set(); }, null);
+        }
+
+        // Note: whenever we create new StringSocket connections, use a unique port
+    }
+}

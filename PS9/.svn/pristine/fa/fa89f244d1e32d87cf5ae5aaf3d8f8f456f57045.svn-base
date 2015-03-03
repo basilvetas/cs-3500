@@ -1,0 +1,63 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using BoggleClient;
+using BC;
+
+namespace BoggleClientTest
+{
+    [TestClass]
+    public class BoggleClientTest
+    {
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void BoggleClientTest1()
+        {
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            //player1.Connect("localhost");
+            player1.SendPlayerName("Basil");
+            player1.getOpponent();
+            player1.getOpponentScore();
+            player1.getPlayerName();
+            player1.getPlayerScore();
+            player1.getTime();
+            player1.getBoard();
+            player1.SendWord("Hello");
+            player1.Disconnect();
+            player1.setBoard("ABCDEFGHIJKLMNOP");
+            player1.setOpponent("Lance");
+            player1.setOpponentScore("0");
+            player1.setPlayerName("Basil");
+            player1.setPlayerScore("100");
+            player1.setTime("500");
+            player1.LineReceived("START ", null, null);
+            player1.LineReceived("TIME ", null, null);
+            player1.LineReceived("SCORE ", null, null);
+            player1.LineReceived("STOP ", null, null);
+            player1.LineReceived("TERMINATED", null, null);
+            player1.LineReceived("IGNORING ", null, null);
+        }
+
+        [TestMethod]
+        public void BoggleClientTest2()
+        {
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            BoggleClientModel player2 = new BoggleClientModel();
+            player1.Connect("localhost");
+            player2.Connect("localhost");
+            player1.SendPlayerName("Basil");
+            player2.SendPlayerName("Lance");
+
+            player1.ScoreLineEvent += testScore;
+        }
+
+        private void testScore(string obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

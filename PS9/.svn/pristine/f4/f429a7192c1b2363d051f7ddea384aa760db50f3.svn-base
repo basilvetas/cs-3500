@@ -1,0 +1,121 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace BC
+{
+    /// <summary>
+    /// Interaction logic for GamePage.xaml
+    /// </summary>
+    public partial class GamePage : Page
+    {
+        /// <summary>
+        /// Model to allow this page to interact with data (passed in as a parameter)
+        /// </summary>
+        private BoggleClientModel model;        
+
+        /// <summary>
+        /// This is the page where most of the game will happen.
+        /// </summary>
+        /// <param name="model"></param>
+        public GamePage(BoggleClientModel model)
+        {
+            InitializeComponent();
+            this.model = model;
+
+            model.setBoard("abcdefghijklmnop");
+
+            // initialize the boggle board
+            InitializeBoard(model.getBoard().ToCharArray());
+
+            model.TimeLineEvent += TimeReceived;
+            model.ScoreLineEvent += ScoreReceived;
+            model.StopLineEvent += StopReceived;
+            model.TerminatedLineEvent += TerminatedReceived;
+            model.IgnoreLineEvent += IgnoreReceived;
+        }
+
+        /// <summary>
+        /// Helper Method to initialize Boggle Board
+        /// </summary>
+        /// <param name="board"></param>
+        private void InitializeBoard(Char[] board)
+        {
+            Cell1.Text = board[0].ToString();
+            Cell2.Text = board[1].ToString();
+            Cell3.Text = board[2].ToString();
+            Cell4.Text = board[3].ToString();
+            Cell5.Text = board[4].ToString();
+            Cell6.Text = board[5].ToString();
+            Cell7.Text = board[6].ToString();
+            Cell8.Text = board[7].ToString();
+            Cell9.Text = board[8].ToString();
+            Cell10.Text = board[9].ToString();
+            Cell11.Text = board[10].ToString();
+            Cell12.Text = board[11].ToString();
+            Cell13.Text = board[12].ToString();
+            Cell14.Text = board[13].ToString();
+            Cell15.Text = board[14].ToString();
+            Cell16.Text = board[15].ToString();
+        }
+
+        /// <summary>
+        /// Handle when the server sends information about the timer.
+        /// </summary>
+        /// <param name="line"></param>
+        private void TimeReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// Handle when the server sends information about the score.
+        /// </summary>
+        /// <param name="line"></param>
+        private void ScoreReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// If a STOP message is received, it means the game is over.
+        /// </summary>
+        /// <param name="line"></param>
+        private void StopReceived(String line)
+        {
+
+        }
+
+        /// <summary>
+        /// Event for when we receive a TERMINATED message from the server,
+        /// meaning a client has disconnected or become inaccessible. If this
+        /// happens, the game ends so just disconnect the remaining client.
+        /// </summary>
+        /// <param name="line"></param>
+        private void TerminatedReceived(String line)
+        {            
+            model.Disconnect();
+        }
+
+        /// <summary>
+        /// If we receive an IGNORING message from the server, it means the 
+        /// client has deviated from the protocol.
+        /// </summary>
+        /// <param name="line"></param>
+        private void IgnoreReceived(String line)
+        {
+
+        }        
+    }
+}

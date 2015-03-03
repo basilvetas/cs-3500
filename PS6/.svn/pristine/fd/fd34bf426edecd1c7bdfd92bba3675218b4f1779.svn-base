@@ -1,0 +1,151 @@
+﻿------------------------------------ PS6 Notes ------------------------------------
+
+Author: Basil Vetas
+Date: 11-4-2014
+
+
+// need to deal with what happens if the evaluate creates a formula error and another 
+            // cell references that formula error
+
+* If I reference a cell that has a string in it then an exception is thrown
+* How do I make it so I can change the name of my spreadsheet Form (title) when I save it? 
+
+* What should I put in the Formula Errors - just a string "Formula Error"?
+
+* Ask about how to end file extension - the DefaultExt and my loop to check for .sprd
+
+Need to handle the following cases:
+
+1. A cell references a cell with a formula error
+A1 = 1/2
+A2 = A1
+change A1 = 1/0 - unhandled exception
+
+2. A cell references a cell without a value
+A2 = A1
+
+* I also want to add functionality so that I can use arrow keys to move to different cells in the panel
+
+---------------------
+
+Author: Basil Vetas
+Date: 11-1-2014
+
+Start of PS6. From PS5, I have added the grading tests and doneall necessary 
+debugging so that my PS5 code passes all grading tests. 
+
+In constructors, want to initialize new spreadsheets to make sure cell names are
+valid, and make cells go to uppercase, and version = "ps6"
+
+
+------------------------------------ PS5 Notes ------------------------------------
+
+Name: Basil Vetas
+Date: 10-13-2014
+
+Implemented Change and Save methods. However, make sure to change the 'Save' method to write to 
+the given file name rather than the Console. Also, when I do this I will need to take care of error
+handling. Make sure to test for 'null' given as the file name and invalid file names. 
+
+Still need to finish 4-arg constructor and getsaved version.  These will have similar error handling
+for reading in the file I think, but also have extra checks as specified in the assigment. 
+
+---------------------
+
+Name: Basil Vetas
+Date: 10-10-2014
+
+So far I have spent roughly 2 hours reading the requirements and implementing the new constructors
+required for PS5.
+
+---------------------
+
+Name: Basil Vetas
+Date: 10-6-2014
+
+For the IsValid function -- didn't we already do that in the Formula class
+	- do I need to change anything in the Formula class or only in Spreadsheet?
+	- maybe in my cell constructor for Formulas I will need to pass in an IsValid param
+	- same thing with Normalize delegate for Formula cells
+How do I set up the 4 argument constructor?
+	- does in need to extend my three argument constructor?
+	- does in need to initializet he dictionary and dependency graph?
+How do I read in a saved file?
+	- make sure to throw SpreadsheetReadWriteException for errors
+		- see specs for conditions on which to throw an error
+How to fix my test cases?
+	- do they need to all use the SetContentsOfCell method rather than the
+	SetCellContents method from PS4? / after implementing the method
+For GetCellValue, think about how to get the value of a formula from a cell
+	- the cell will need to evaluate the formula 
+	- how do I figure out the value of the variables
+		- somehow I will have to pass in the dependency graph from the spreadsheet to the cell
+For the Changed method, I should probably just use a boolean to keep track of changed conditions
+Need to review how to write an XML file in a method (Save method) - go to office hours 
+May possibly need a REGEX code for IsValid param for valid cells names
+	- [a-z]+[1-9]+ should be the right code but double check
+
+------------------------------------ PS4 Notes ------------------------------------
+
+Name: Basil Vetas
+Date: 10-1-2014
+
+Notes:
+
+For Spreadsheet:
+
+- May want a variable to keep track of all non-empty cells
+- Read message from Matt 
+
+- do SetCellContents
+- do GetDirectDependents first
+
+For the Cell class, I want it to have the following properties:
+	- String contents
+	- String value
+	- String row
+	- String column
+	- May want a data structure to keep track of dependents if a formula 
+	- (or maybe just a 'name' for both row and column)
+	- may want a helper variable to indicate if it is a string, double, or formula
+	- String content_type: either a 'string'; a 'double'; or a 'Formula' or an empty string ""
+	- Note: if the content_type is an empty string, we say the cell is empty
+	- Note: cells are initialized to an empty string
+	- String value_type can be either a 'string'; a 'double'; or a 'FormulaError'
+	- If content_type = 'double' then value_type = 'double'
+	- If content_type = 'string' then value_type = 'string'
+	- If content_type = 'Formula' then value_type = 'double' or 'FormulaError' (Based on Evaluate method)
+	- (the values of variables can also only be 'double' or 'undefined' if FormulaError since they reference other cell values)
+	
+
+One method return all its direct and indirect dependents - call the
+prewritten method
+
+Questions for TA:
+
+X Do I wanted the Properties -> Build -> XML documentation file box checked
+	for the Resources project? I wanted it checked for the others right?
+
+X Where do I find my .dll files / which should I be adding to Resources -> Libraries?
+
+X How do I fix my build errors?
+
+X Is Override the correct syntax for relationship with abstract methods?
+
+X Where do I comment the Recalculate method - in XML comments or in the method?
+
+X SetCellContents calls?  Whats wrong with my cell class / overload constructor?
+
+X What to do with Dependency Graph?
+
+X GetAllNonEmpty Method - Check if any of cells are empty string - for the GetAllNonEmpty method
+
+X ReferenceEquals the correct way to check if null?
+
+X How to write a test for circular reference?
+
+X How to write a test for GetDirect Dependents?
+
+X Debugging for circular reference
+
+**ME: add comments for Visit class**

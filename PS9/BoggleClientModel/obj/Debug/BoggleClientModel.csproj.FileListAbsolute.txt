@@ -1,0 +1,9 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\BoggleClientModel.exe.config
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\BoggleClientModel.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\BoggleClientModel.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\BoggleClientModel.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\StringSocket.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\bin\Debug\StringSocket.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\obj\Debug\BoggleClientModel.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\obj\Debug\BoggleClientModel.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleClientModel\obj\Debug\BoggleClientModel.pdb

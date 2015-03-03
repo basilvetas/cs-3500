@@ -1,0 +1,5 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculatorTest\bin\Debug\TipCalculatorTest.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculatorTest\bin\Debug\TipCalculatorTest.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculatorTest\obj\Debug\TipCalculatorTest.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculatorTest\obj\Debug\TipCalculatorTest.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\TipCalculator\TipCalculatorTest\obj\Debug\TipCalculatorTest.pdb

@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FormulaEvaluator;
+
+namespace FormulaEvaluatorTester
+{
+    /// <summary>
+    ///     A Console Application for testing the FormulaEvaluator Class Library
+    /// </summary>
+    public class EvaluatorTester
+    {
+        /// <summary>
+        ///     Main method for testing the FormulaEvaluator class
+        /// </summary>
+        /// <param name="args"></param>
+        public static void Main(string[] args)
+        {
+
+            Console.Write("Hello World");
+            Console.Read();
+
+            Evaluator.Evaluate("1+1", LookupMethod);
+        }
+
+        // Method for the Lookup delegate
+        public static int LookupMethod(string v)
+        {
+            return 0;
+        }
+    }
+}

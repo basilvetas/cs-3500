@@ -1,0 +1,10 @@
+﻿Name: Basil Vetas
+Date: 10-1-2014
+
+Notes:
+
+For the Cell class, I want it to have the following properties:
+	- String contents
+	- String value
+	- String row
+	- String column

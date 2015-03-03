@@ -1,0 +1,9 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\DevelopmentTests.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\DevelopmentTests.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\DevelopmentTests.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\SpreadsheetUtilities.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\SpreadsheetUtilities.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\bin\Debug\SpreadsheetUtilities.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\obj\Debug\DevelopmentTests.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\obj\Debug\DevelopmentTests.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\DevelopmentTests\obj\Debug\DevelopmentTests.pdb

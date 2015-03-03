@@ -1,0 +1,31 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using BoggleServer;
+
+namespace BoggleServerTest
+{
+    /// <summary>
+    /// Unit tests for our BoggleServer
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    [TestClass]
+    public class BoggleServerTest
+    {
+        /// <summary>
+        /// Starts a new server with two arguments, stops it, and then starts a new server
+        /// with three arguments, and stops it.
+        /// </summary>
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string[] twoArgs = { "200", "dictionary" };
+            BoggleServer.BoggleServer twoArgServer = new BoggleServer.BoggleServer(twoArgs);
+            twoArgServer.Stop();
+
+            string[] threeArgs = { "200", "dictionary", "jimiergsatnesaps" };
+            BoggleServer.BoggleServer threeArgServer = new BoggleServer.BoggleServer(threeArgs);
+            threeArgServer.Stop();
+        }
+    }
+}

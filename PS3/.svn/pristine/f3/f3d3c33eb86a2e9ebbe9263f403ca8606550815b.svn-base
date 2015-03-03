@@ -1,0 +1,129 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SpreadsheetUtilities;
+
+namespace FormulaTester
+{
+    /// <summary>
+    /// Comment 
+    ///
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>September 23rd 2014</date>
+    [TestClass()]
+    public class FormulaTester
+    {
+
+        // --------------------- Tests ------------------------- //
+
+        /// <summary>
+        /// This test evaluates whether the Formula class returns 2.0 when given 1 + 1
+        /// </summary>
+        [TestMethod()]
+        public void Test1()
+        {
+            Formula formula_tester = new Formula("1 + 1");
+            object result = formula_tester.Evaluate(null);            
+            Assert.AreEqual(2.0, result); 
+
+            //System.Diagnostics.Debug.WriteLine("Hello");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestMethod()]
+        public void Test2()
+        {
+
+        }
+
+        /// <summary>
+        /// This test evaluates the validator delegate for the single parameter
+        /// call of Formula class.  Checks that the validator maps everything to true
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest3()
+        {
+
+        }
+
+        /// <summary>
+        /// This test evaluates whether the Formula class returns _____
+        /// when given an empty string parameter and two delegate functions
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest4()
+        {
+
+        }
+
+        /// <summary>
+        /// This test evaluates the normalizer delegate when it is defined as a
+        /// parameter for the Formula class
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest5()
+        {
+
+        }
+
+        /// <summary>
+        /// This test evaluates the validator delegate when it is defined as a
+        /// parameter for the Formula class.
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest6()
+        {
+
+        }
+
+        // ----------------- Exception Handling Tests -------------------- //
+
+        // I may want to return a FormatError struct for these cases
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the single parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest7()
+        {
+            Formula invalid = new Formula("111AAA");
+        }
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the three parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest8()
+        {
+            Formula invalid = new Formula("111AAA", null, null);
+        }
+
+        // will need to create more invalid format tests for all the
+        // possibly ways that a format can be invalid and make sure to
+        // test them for both the single and 3 parameter constructors. 
+        // Unless I can just create a helper method to check for format
+        // which both constructors can call to check it.  Then I only need to
+        // test one of the constructors. 
+
+        // ----------------- Non-Empty Formula Format Tests -------------------- //
+
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the three parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        //[ExpectedException(FormulaFormatException)]
+        public void EmptyTest9()
+        {
+            Formula parens = new Formula("(1 + 1) - 2)");
+            // should throw an exception
+
+        }
+
+    }
+}

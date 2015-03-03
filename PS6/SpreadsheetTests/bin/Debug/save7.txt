@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<spreadsheet version="default">
+  <cell>
+    <name>A1</name>
+    <contents>2</contents>
+  </cell>
+  <cell>
+    <name>A2</name>
+    <contents>2</contents>
+  </cell>
+  <cell>
+    <name>A3</name>
+    <contents>3</contents>
+  </cell>
+  <cell>
+    <name>A4</name>
+    <contents>4</contents>
+  </cell>
+  <cell>
+    <name>B1</name>
+    <contents>=A1/A2</contents>
+  </cell>
+  <cell>
+    <name>B2</name>
+    <contents>=A3*A4</contents>
+  </cell>
+  <cell>
+    <name>C1</name>
+    <contents>=B1+B2</contents>
+  </cell>
+</spreadsheet>

@@ -1,0 +1,5 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS6\CodedUITestProject1\bin\Debug\CodedUITestProject1.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS6\CodedUITestProject1\bin\Debug\CodedUITestProject1.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS6\CodedUITestProject1\obj\Debug\CodedUITestProject1.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS6\CodedUITestProject1\obj\Debug\CodedUITestProject1.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS6\CodedUITestProject1\obj\Debug\CodedUITestProject1.pdb

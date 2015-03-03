@@ -1,0 +1,56 @@
+﻿Name: Basil Vetas
+Date: 10-1-2014
+
+Notes:
+
+For Spreadsheet:
+
+- May want a variable to keep track of all non-empty cells
+- Read message from Matt 
+
+- do SetCellContents
+- do GetDirectDependents first
+
+For the Cell class, I want it to have the following properties:
+	- String contents
+	- String value
+	- String row
+	- String column
+	- May want a data structure to keep track of dependents if a formula 
+	- (or maybe just a 'name' for both row and column)
+	- may want a helper variable to indicate if it is a string, double, or formula
+	- String content_type: either a 'string'; a 'double'; or a 'Formula' or an empty string ""
+	- Note: if the content_type is an empty string, we say the cell is empty
+	- Note: cells are initialized to an empty string
+	- String value_type can be either a 'string'; a 'double'; or a 'FormulaError'
+	- If content_type = 'double' then value_type = 'double'
+	- If content_type = 'string' then value_type = 'string'
+	- If content_type = 'Formula' then value_type = 'double' or 'FormulaError' (Based on Evaluate method)
+	- (the values of variables can also only be 'double' or 'undefined' if FormulaError since they reference other cell values)
+	
+
+One method return all its direct and indirect dependents - call the
+prewritten method
+
+Questions for TA:
+
+X Do I wanted the Properties -> Build -> XML documentation file box checked
+	for the Resources project? I wanted it checked for the others right?
+
+X Where do I find my .dll files / which should I be adding to Resources -> Libraries?
+
+X How do I fix my build errors?
+
+X Is Override the correct syntax for relationship with abstract methods?
+
+X Where do I comment the Recalculate method - in XML comments or in the method?
+
+X SetCellContents calls?  Whats wrong with my cell class / overload constructor?
+
+X What to do with Dependency Graph?
+
+Am I making a safe cast?
+
+Check if any of cells are empty string - for the GetAllNonEmpty method
+
+ReferenceEquals the correct way to check if null?

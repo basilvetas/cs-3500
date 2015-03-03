@@ -1,0 +1,7 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\bin\Debug\Resources.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\obj\Debug\Resources.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\bin\Debug\Resources.dll.config
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\bin\Debug\Resources.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\bin\Debug\Resources.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\obj\Debug\Resources.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS4\Resources\obj\Debug\Resources.pdb

@@ -1,0 +1,94 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using BoggleClient;
+using BC;
+
+namespace BoggleClientTest
+{
+    [TestClass]
+    public class BoggleClientTest
+    {
+         ///<summary>
+         ///Test connect and disconnect for one player
+         ///</summary>
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void BoggleClientTest1()
+        {
+            ManualResetEvent mre1 = new ManualResetEvent(false);
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            player1.Connect("localhost");
+            player1.Disconnect();
+            mre1.WaitOne();
+        }
+
+        /// <summary>
+        /// Test getters and setters
+        /// </summary>
+        [TestMethod]
+        public void BoggleClientTest2()
+        {
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            player1.setBoard("ABCDEFGHIJKLMNOP");
+            Assert.AreEqual("ABCDEFGHIJKLMNOP", player1.getBoard());
+            player1.setPlayerName("BASIL");
+            Assert.AreEqual("BASIL", player1.getPlayerName());
+            player1.setPlayerScore("100");
+            Assert.AreEqual("100", player1.getPlayerScore());
+            player1.setOpponent("LANCE");
+            Assert.AreEqual("LANCE", player1.getOpponent());
+            player1.setOpponentScore("0");
+            Assert.AreEqual("0", player1.getOpponentScore());
+            player1.setTime("500");
+            Assert.AreEqual("500", player1.getTime());
+        }
+
+        /// <summary>
+        /// Test getters and setters
+        /// </summary>
+        [TestMethod]
+        public void BoggleClientTest3()
+        {
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            player1.setBoard("ABCDEFGHIJKLMNOP");
+            Assert.AreEqual("ABCDEFGHIJKLMNOP", player1.getBoard());
+            player1.setPlayerName("BASIL");
+            Assert.AreEqual("BASIL", player1.getPlayerName());
+            player1.setPlayerScore("100");
+            Assert.AreEqual("100", player1.getPlayerScore());
+            player1.setOpponent("LANCE");
+            Assert.AreEqual("LANCE", player1.getOpponent());
+            player1.setOpponentScore("0");
+            Assert.AreEqual("0", player1.getOpponentScore());
+            player1.setTime("500");
+            Assert.AreEqual("500", player1.getTime());
+        }
+
+        [TestMethod]
+        public void BoggleClientTest10()
+        {
+            string[] args = { "30", "..\\..\\..\\Resources\\dictionary.txt" };
+            new BoggleServer.BoggleServer(args);
+            BoggleClientModel player1 = new BoggleClientModel();
+            BoggleClientModel player2 = new BoggleClientModel();
+            player1.Connect("localhost");
+            player2.Connect("localhost");
+            player1.SendPlayerName("Basil");
+            player2.SendPlayerName("Lance");
+
+            player1.ScoreLineEvent += testScore;
+        }
+
+        private void testScore(string obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

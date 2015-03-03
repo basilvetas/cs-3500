@@ -1,0 +1,13 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\obj\Debug\SpreadsheetTests.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\SpreadsheetTests.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\SpreadsheetTests.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\SpreadsheetTests.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\Formula.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\Spreadsheet.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\SpreadsheetUtilities.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\Spreadsheet.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\Spreadsheet.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\Formula.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\bin\Debug\SpreadsheetUtilities.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\obj\Debug\SpreadsheetTests.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS5\SpreadsheetTests\obj\Debug\SpreadsheetTests.pdb

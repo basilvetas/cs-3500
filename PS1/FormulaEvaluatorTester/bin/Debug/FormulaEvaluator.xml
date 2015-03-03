@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FormulaEvaluator</name>
+    </assembly>
+    <members>
+        <member name="T:FormulaEvaluator.Evaluator">
+            <summary>
+                A public static class for evaluating arithmetic expressions.  Valid operations include
+                addition, subtraction, multiplication, and division following infix notation.
+            </summary>
+        </member>
+        <member name="M:FormulaEvaluator.Evaluator.Evaluate(System.String,FormulaEvaluator.Evaluator.Lookup)">
+            <summary>
+                Evaluates an arithmetic expression that is passed in as a String. If the expression 
+                includes variables, the method will use the delegate Lookup function to attain the
+                associated values with those variables.
+            </summary>
+            <param name="exp">The arithmetic expression to be evaluated</param>
+            <param name="variableEvaluator">A LookUp method passed in as a parameter</param>
+            <returns>Returns an integer result</returns>
+        </member>
+        <member name="T:FormulaEvaluator.Evaluator.Lookup">
+            <summary>
+                Delegate Lookup function for variables in an arithmetic expression
+            </summary>
+            <param name="v">The name of the variable</param>
+            <returns>An integer value associated with the param variable</returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,5 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\Threads\Public\Lab_Examples\Threads\Threads\bin\Debug\Threads.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\Threads\Public\Lab_Examples\Threads\Threads\bin\Debug\Threads.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\Threads\Public\Lab_Examples\Threads\Threads\obj\x86\Debug\Threads.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\Threads\Public\Lab_Examples\Threads\Threads\obj\x86\Debug\Threads.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\Threads\Public\Lab_Examples\Threads\Threads\obj\x86\Debug\Threads.pdb

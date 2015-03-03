@@ -1,0 +1,9 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS8(1)\BoggleServer\bin\Debug\BoggleServer.exe.config
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\bin\Debug\BoggleServer.exe.config
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\bin\Debug\BoggleServer.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\bin\Debug\BoggleServer.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\bin\Debug\BoggleServer.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\bin\Debug\StringSocketOfficial.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\obj\Debug\BoggleServer.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\obj\Debug\BoggleServer.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS9\BoggleServer\obj\Debug\BoggleServer.pdb

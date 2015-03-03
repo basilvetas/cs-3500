@@ -1,0 +1,10 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluatorTester.exe.config
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluatorTester.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluatorTester.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluatorTester.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluator.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluator.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\bin\Debug\FormulaEvaluator.xml
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\obj\Debug\FormulaEvaluatorTester.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\obj\Debug\FormulaEvaluatorTester.exe
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS1\FormulaEvaluatorTester\obj\Debug\FormulaEvaluatorTester.pdb

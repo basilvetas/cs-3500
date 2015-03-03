@@ -1,0 +1,178 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CustomNetworking;
+using System.Net.Sockets;
+using System.Net;
+
+namespace BoggleServer
+{
+    /// <summary>
+    /// This program creates the server side of our Boggle game. Update
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    class BoggleServer
+    {
+        // Listens for incoming connections
+        private TcpListener server;
+
+        // One StringSocket per connected client
+        private List<StringSocket> allSockets;
+
+        // the name associated with the socket
+        private List<string> user_names;
+
+        // the number of seconds that each Boggle game should last (passed in as parameter)
+        private int gameLength;
+
+        // the path name of a file that contains all the legal words (passed in as parameter)
+        private string legalWordsFile;
+
+        // optional string of exactly 16 letters used to initialize each Boggle board (optional parameter)
+        private string initialBoggleBoard;
+
+        /// <summary>
+        /// Will set up the Boggle Server
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            int parameters; // holds number of parameters we receive from console
+
+            // can only take 2 or 3 parameters
+            if (args.Length == 2)
+                parameters = 2;
+            else if (args.Length == 3)
+                parameters = 3;
+            else // otherwise return with error
+            {   
+                Console.Error.WriteLine("Invalid number of arguments.");
+                return;
+            }                
+
+            // variables for BoggleServer constructor
+            int timer;
+            string pathname;
+            string initBoard;
+
+            // if the first arg is an int, get it as our timer
+            if (int.TryParse(args[0], out timer)) 
+            {
+                if(!(timer > 0))    // if the time is not positive, return with error
+                {
+                    Console.Error.WriteLine("Invalid time argument. Must be positive.");
+                    return;
+                }
+            }
+            else // otherwise return with error
+            {
+                Console.Error.WriteLine("Invalid time argument. Must be a positive integer.");
+                return;                                 
+            }
+
+            // need to check if the file can be read properly
+            pathname = args[1];
+
+            // if there are three parameters, use it
+            if (parameters == 3)
+            {
+                if(args[2].Length != 16) // if the initial board is not 16 characters
+                {
+                    // return with error
+                    Console.Error.WriteLine("Initial Boggle board setup must have 16 characters.");
+                    return;
+                }
+
+                initBoard = args[2];
+            } 
+            else initBoard = null; // otherwise set it to null            
+
+            // create a new game server and read line
+            new BoggleServer(timer, pathname, initBoard);
+            Console.ReadLine();
+        }
+
+        /// <summary>
+        /// Create a Boggle Server. 
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="pathname"></param>
+        /// <param name="initBoard"></param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private BoggleServer(int timer, string pathname, string initBoard)
+        {
+            // initialize paramter variables
+            gameLength = timer;
+            legalWordsFile = pathname;
+            initialBoggleBoard = initBoard;
+
+            allSockets = new List<StringSocket>(); // will hold all the string sockets between clients
+            user_names = new List<string>();    // will hold names of all players
+
+            server = new TcpListener(IPAddress.Any, 2000); // create new server
+            server.Start(); // start the server
+            server.BeginAcceptSocket(ConnectionReceived, null); // begin accepting connections
+        }
+
+        /// <summary>
+        /// Deals with connection requests
+        /// </summary>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void ConnectionReceived(IAsyncResult ar)
+        {
+            Socket socket = server.EndAcceptSocket(ar);
+            StringSocket ss = new StringSocket(socket, UTF8Encoding.Default);
+            ss.BeginReceive(NameReceived, ss);
+            server.BeginAcceptSocket(ConnectionReceived, null);
+        }
+
+        /// <summary>
+        /// Receives the first line of text from the client, which contains the name of the remote
+        /// user.  Uses it to compose and send back a welcome message.
+        /// </summary>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void NameReceived(String name, Exception e, object p)
+        {
+            StringSocket ss = (StringSocket)p;
+
+            //Check that name starts with PLAY
+
+            lock (allSockets)
+            {
+                allSockets.Add(ss);
+                user_names.Add(name);
+                ss.BeginSend(name + " welcome to Boggle!\n", (ee, pp) => { }, null);
+                ss.BeginReceive(IncomingCallback, ss);
+                // Question: how would you notify other clients of the new person joining?
+            }
+
+        }
+
+        /// <summary>
+        /// Deals with lines of text as they arrive at the server.
+        /// </summary>
+        /// <param name="line"> Question: how would comment these parameters?</param>
+        /// <param name="e"></param>
+        /// <param name="ss"></param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void IncomingCallback(String line, Exception e, object ss)
+        {
+            Console.WriteLine(line);
+            lock (allSockets)
+            {
+                // Question: what is better: foreach or for?
+                // foreach (StringSocket s in allSockets)
+                for (int i = 0; i < allSockets.Count; i++)
+                {
+                    allSockets[i].BeginSend(user_names[i] + ": " + line + "\r\n", (ex, py) => { }, null);
+                    // Question: why do we create an "empty" lambda function as the call back?
+                    // Question: why do we send \r\n
+                }
+            }
+            ((StringSocket)ss).BeginReceive(IncomingCallback, ss);
+        }
+    }
+}

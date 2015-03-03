@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FormulaEvaluator
+{
+    /// <summary>
+    ///     A public static class for evaluating arithmetic expressions
+    /// </summary>
+    public static class Evaluator
+    {
+        Stack values = new Stack();
+        Stack operators = new Stack();
+
+        public delegate int Lookup(String v);
+
+        public static int Evaluate(String exp, Lookup variableEvaluator)
+        {
+            // Splits string into tokens in an array
+            string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)")
+            return 0;
+        }
+      
+
+    }
+}

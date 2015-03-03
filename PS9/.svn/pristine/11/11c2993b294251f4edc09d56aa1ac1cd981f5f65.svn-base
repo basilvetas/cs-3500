@@ -1,0 +1,38 @@
+﻿<Page x:Class="BC.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="725.806" d:DesignWidth="851.613"
+	Title="HomePage">
+
+    <Grid Width="750" Height="600">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FF360404" Offset="0.025"/>
+                <GradientStop Color="#FFC02222" Offset="0.535"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <TextBlock x:Name="WelcomeMessage" HorizontalAlignment="Left" Margin="128,28,0,0" TextWrapping="Wrap" Text="Welcome to Boggle" VerticalAlignment="Top" Height="56" Width="459" FontFamily="Segoe WP Black" FontSize="35" TextAlignment="Center"/>
+        <TextBlock x:Name="EnterInfo" HorizontalAlignment="Left" Margin="190,100,0,0" TextWrapping="Wrap" Text="Please enter the information below" VerticalAlignment="Top" Height="85" Width="367" FontFamily="Segoe UI Semibold" FontSize="30" TextAlignment="Center"/>
+        <TextBox x:Name="EnterIPAddr" HorizontalAlignment="Left" Height="25" Margin="128,272,0,0" TextWrapping="Wrap" Text="IP Address" VerticalAlignment="Top" Width="150" GotFocus="EnterIPAddr_GotFocus"/>
+        <TextBox x:Name="EnterPlayerName" HorizontalAlignment="Left" Height="25" Margin="484,272,0,0" TextWrapping="Wrap" Text="Player Name" VerticalAlignment="Top" Width="150" GotFocus="EnterPlayerName_GotFocus"/>
+        <Button x:Name="StartButton" Content="Start" HorizontalAlignment="Left" Margin="306,420,0,0" VerticalAlignment="Top" Width="135" Height="61" FontFamily="Stencil" FontSize="25" Click="StartButton_Click">
+            <Button.Background>
+                <RadialGradientBrush>
+                    <GradientStop Color="#FF4E91E8" Offset="0.137"/>
+                    <GradientStop Color="#FF5888C5" Offset="0.567"/>
+                    <GradientStop Color="#FF2B5B98" Offset="0.284"/>
+                    <GradientStop Color="#FF284D7C" Offset="1"/>
+                </RadialGradientBrush>
+            </Button.Background>
+            <Button.Effect>
+                <DropShadowEffect/>
+            </Button.Effect>
+        </Button>
+        <Label Content="IPAddress:" HorizontalAlignment="Left" Height="30" Margin="128,237,0,0" VerticalAlignment="Top" Width="150"/>
+        <Label Content="Player Name:" HorizontalAlignment="Left" Height="30" Margin="484,237,0,0" VerticalAlignment="Top" Width="150"/>
+        <TextBlock x:Name="WaitingMessage" HorizontalAlignment="Left" Margin="111,237,0,0" TextWrapping="Wrap" Text="Finding an opponent Please be patient" VerticalAlignment="Top" Height="175" Width="523" FontFamily="Segoe Print" FontSize="40" Background="White" TextAlignment="Center" Visibility="Hidden"/>       
+    </Grid>
+</Page>

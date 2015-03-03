@@ -1,0 +1,6 @@
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\bin\Debug\SpreadsheetUtilities.XML
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\bin\Debug\SpreadsheetUtilities.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\bin\Debug\SpreadsheetUtilities.pdb
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\obj\Debug\SpreadsheetUtilities.csprojResolveAssemblyReference.cache
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\obj\Debug\SpreadsheetUtilities.dll
+C:\Users\Basil\Documents\Visual Studio 2013\Projects\PS2\SpreadsheetUtilities\obj\Debug\SpreadsheetUtilities.pdb

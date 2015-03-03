@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using CustomNetworking;
+
+
+namespace BoggleClientModel
+{
+    class BoggleClientModel
+    {
+        /// <summary>
+        /// The socket used to communicate with the server.  If no connection has been
+        /// made yet, this is null.
+        /// </summary>
+        private StringSocket socket;
+
+        /// <summary>
+        /// An event specifically to handle the updates from the timer
+        /// </summary>
+        public event Action<String> IncomingTimerEvent;
+
+        /// <summary>
+        /// An event to handle all other communication from the Boggle Server
+        /// </summary>
+        public event Action<String> ServerResponseEvent;
+
+        /// <summary>
+        /// May need this more general event
+        /// </summary>
+        public event Action<String> IncomingLineEvent;
+
+        /// <summary>
+        /// Constructor creates a BoggleClientModel
+        /// </summary>
+        public BoggleClientModel()
+        {
+            socket = null;
+        }
+
+        /// <summary>
+        /// Connect to the server at the given hostname and port and with the give name.
+        /// </summary>
+        public void Connect(string hostname, String name)
+        {
+            if (socket == null)
+            {
+                // connect to port 2000 (Boggle Server port)
+                TcpClient client = new TcpClient(hostname, 2000);
+                socket = new StringSocket(client.Client, UTF8Encoding.Default);
+                socket.BeginSend(name + "\n", (e, p) => { }, null);
+                socket.BeginReceive(LineReceived, null);
+            }
+        }
+
+        /// <summary>
+        /// Sends a word from the client to the server
+        /// </summary>
+        /// <param name="word"></param>
+        public void SendWord(String word)
+        {
+            if (!ReferenceEquals(socket, null))
+            {
+                socket.BeginSend("WORD " + word + "\n", (e, p) => { }, null);
+            }
+        }
+
+        /// <summary>
+        /// Handles an arriving line of text.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        /// <param name="p"></param>
+        public void LineReceived(String s, Exception e, object p)
+        {
+            if (!ReferenceEquals(IncomingLineEvent, null))
+            {
+                IncomingLineEvent(s);
+                //We could separate these events here into timer or other.
+            }
+
+            socket.BeginReceive(LineReceived, null);
+        }
+
+
+    }
+}

@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BoggleClient</name>
+    </assembly>
+    <members>
+        <member name="T:BC.SummaryPage">
+            <summary>
+            Interaction logic for SummaryPage.xaml
+            </summary>
+            <summary>
+            SummaryPage
+            </summary>
+        </member>
+        <member name="M:BC.SummaryPage.#ctor(BC.BoggleClientModel,System.String)">
+            <summary>
+            Summary of a boggle game
+            </summary>
+            <param name="model"></param>
+            <param name="summary"></param>
+        </member>
+        <member name="M:BC.SummaryPage.MakeSummary(System.String)">
+            <summary>
+            Makes the summary
+            </summary>
+            <param name="summary"></param>
+        </member>
+        <member name="M:BC.SummaryPage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:BoggleClient.App">
+            <summary>
+            Interaction logic for App.xaml
+            </summary>
+            <summary>
+            App
+            </summary>
+        </member>
+        <member name="M:BoggleClient.App.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:BoggleClient.App.Main">
+            <summary>
+            Application Entry Point.
+            </summary>
+        </member>
+        <member name="T:BC.GamePage">
+            <summary>
+            Interaction logic for GamePage.xaml
+            </summary>
+            <summary>
+            GamePage
+            </summary>
+        </member>
+        <member name="F:BC.GamePage.model">
+            <summary>
+            Model to allow this page to interact with data (passed in as a parameter)
+            </summary>
+        </member>
+        <member name="M:BC.GamePage.#ctor(BC.BoggleClientModel)">
+            <summary>
+            This is the page where most of the game will happen.
+            </summary>
+            <param name="model"></param>
+        </member>
+        <member name="M:BC.GamePage.InitializeBoard(System.Char[])">
+            <summary>
+            Helper Method to initialize Boggle Board
+            </summary>
+            <param name="board"></param>
+        </member>
+        <member name="M:BC.GamePage.TimeReceived(System.String)">
+            <summary>
+            Handle when the server sends information about the timer.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.GamePage.ScoreReceived(System.String)">
+            <summary>
+            Handle when the server sends information about the score.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.GamePage.StopReceived(System.String)">
+            <summary>
+            If a STOP message is received, it means the game is over.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.GamePage.TerminatedReceived(System.String)">
+            <summary>
+            Event for when we receive a TERMINATED message from the server,
+            meaning a client has disconnected or become inaccessible. If this
+            happens, the game ends so just disconnect the remaining client.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.GamePage.IgnoreReceived(System.String)">
+            <summary>
+            If we receive an IGNORING message from the server, it means the 
+            client has deviated from the protocol.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.GamePage.getRemainingTime(System.String)">
+            <summary>
+            Helper method to convert the time as a string in seconds to 
+            the proper form in minutes:seconds. 
+            </summary>
+            <param name="gameLength"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BC.GamePage.WordsEntered_KeyDown(System.Object,System.Windows.Input.KeyEventArgs)">
+            <summary>
+            Triggered when a new word is entered 
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:BC.GamePage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:BC.HomePage">
+            <summary>
+            Interaction logic for HomePage.xaml
+            </summary>
+            <summary>
+            HomePage
+            </summary>
+        </member>
+        <member name="F:BC.HomePage.model">
+            <summary>
+            model to allow this page to interact with data (passed in as a parameter)
+            </summary>
+        </member>
+        <member name="M:BC.HomePage.#ctor(BC.BoggleClientModel)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:BC.HomePage.EnterIPAddr_GotFocus(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Makes it so that the user can type in immediately after clicking.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:BC.HomePage.EnterPlayerName_GotFocus(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Makes it so that the user can type in immediately after clicking.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:BC.HomePage.StartButton_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Send the data to the server and switch pages.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:BC.HomePage.WaitToBeginGame">
+            <summary>
+            Helper method called once a connection is successfully made
+            </summary>
+        </member>
+        <member name="M:BC.HomePage.StartReceived(System.String)">
+            <summary>
+            Once the game starts, transition to the GamePage.
+            </summary>
+            <param name="line"></param>
+        </member>
+        <member name="M:BC.HomePage.ConnectionReceived(System.Boolean)">
+            <summary>
+            Event checks if a connection is successful
+            </summary>
+            <param name="connected"></param>
+        </member>
+        <member name="M:BC.HomePage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:BC.MainWindow">
+            <summary>
+            Interaction logic for MainWindow.xaml
+            </summary>
+            <summary>
+            MainWindow
+            </summary>
+        </member>
+        <member name="F:BC.MainWindow.model">
+            <summary>
+            Internal model
+            </summary>
+        </member>
+        <member name="M:BC.MainWindow.#ctor">
+            <summary>
+            Constructor for MainWindow. This constructor simply creates a new
+            BoggleClientModel object and passes it to the homepage. 
+            </summary>
+        </member>
+        <member name="M:BC.MainWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:BoggleClient.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:BoggleClient.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:BoggleClient.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+    </members>
+</doc>

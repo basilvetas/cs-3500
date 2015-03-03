@@ -1,0 +1,165 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SS;
+using SpreadsheetUtilities;
+
+namespace SpreadsheetTests
+{
+    [TestClass]
+    public class SpreadsheetTests
+    {
+        /// <summary>
+        /// Tests null exception for all three SetCellContents methods (string)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod1()
+        {
+            String empty = null;
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("A1", empty);               
+        }
+
+        /// <summary>
+        /// Tests null name exception for all three SetCellContents method (string)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents(null, "string");
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three SetCellContents method (string)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod3()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("4356", "string");
+
+        }
+
+        /// <summary>
+        /// Tests null name exception for all three GetCellContents methods
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod4()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.GetCellContents(null);
+
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three GetCellContents methods
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod5()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.GetCellContents("45345");
+
+        }
+
+        /// <summary>
+        /// Tests null exception for all three SetCellContents methods (Formula)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod6()
+        {
+            Formula empty = null;            
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("A1", empty);
+        }
+
+        /// <summary>
+        /// Tests null name exception for all three SetCellContents method (Formula)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod7()
+        {
+            Formula test = new Formula("1 + 1");
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents(null, test);
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three SetCellContents method (Formula)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod8()
+        {
+            Formula test = new Formula("1 + 1");
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("4356", test);
+
+        }
+
+        /// <summary>
+        /// Tests null name exception for all three SetCellContents method (double)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod9()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents(null, 2);
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three SetCellContents method (double)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod10()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("4356", 2);
+
+        }
+
+        /// <summary>
+        /// Tests null arg exception for GetDirectDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod12()
+        {
+            PrivateObject accessor = new PrivateObject(new Spreadsheet());
+            accessor.Invoke("GetDirectDependents", new Object[] { null });
+
+        }
+
+        /// <summary>
+        /// Tests null arg exception for GetDirectDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod13()
+        {
+            PrivateObject accessor = new PrivateObject(new Spreadsheet());
+            accessor.Invoke("GetDirectDependents", new Object[] { "4353" });           
+        }
+
+        /// <summary>
+        /// Tests null arg exception for GetDirectDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod14()
+        {
+            PrivateObject accessor = new PrivateObject(new Spreadsheet());
+            accessor.Invoke("GetDirectDependents", new Object[] { "A1" });
+
+        }
+    }
+}

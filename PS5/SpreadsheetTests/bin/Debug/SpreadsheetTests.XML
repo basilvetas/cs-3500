@@ -1,0 +1,343 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SpreadsheetTests</name>
+    </assembly>
+    <members>
+        <member name="T:SpreadsheetTester.GradingTests">
+             <summary>
+            This is a test class for SpreadsheetTest and is intended
+            to contain all SpreadsheetTest Unit Tests
+            </summary>
+        </member>
+        <member name="P:SpreadsheetTester.GradingTests.TestContext">
+             <summary>
+            Gets or sets the test context which provides
+            information about and functionality for the current test run.
+            </summary>
+        </member>
+        <member name="T:SpreadsheetTests.SpreadsheetTests">
+            <summary>
+            Test class for PS5. NEED TO COPY OVER RELEVANT TESTS FROM PS4. I assume
+            that the implementation of PS4 used in Spreadsheet passes 100% of the grading tests for PS4,
+            which is true because I have made all necessary corrections to my PS4 assignment. 
+            </summary>
+            <author>Basil Vetas</author>
+            <date>10-6-2014</date>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod0">
+            <summary>
+                Tests if all the constructors work. This test simply assumes that an error will
+                not be thrown for any of the constructors.
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod1">
+            <summary>
+                Tests if cell name for GetCellValue is null
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod2">
+            <summary>
+                Tests if cell name for GetCellValue is invalid
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod7">
+            <summary>
+                Tests SetContentsOfCell for a null content parameter
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod8">
+            <summary>
+                Tests SetContentsOfCell for a null name parameter
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod9">
+            <summary>
+                Tests SetContentsOfCell for an invalid name parameter
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod10">
+            <summary>
+                Tests SetContentsOfCell for an invalid formula exception
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod11">
+            <summary>
+                Tests SetContentsOfCell for an invalid formula exception
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod14">
+            <summary>
+                Tests GetCellValue, expected a double given a double.
+                Also tests SetContentsOfCell given a double (as a string).
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod15">
+            <summary>
+                Tests GetCellValue, expected a double given a double.
+                Also tests SetContentsOfCell given a double (as a string).
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.check_var(System.String)">
+            <summary>
+                helper delegate method
+            </summary>
+            <param name="s"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod17">
+            <summary>
+                 Tests when we try to save a spreadsheet to a null filepath location
+             </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod18">
+            <summary>
+                 Tests when we try to save a spreadsheet to an empty filepath location
+             </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod19">
+            <summary>
+                Tests when we try to read a spreadsheet from a null filepath location
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod20">
+            <summary>
+                Tests when we try to read a spreadsheet from an empty filepath location
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:SpreadsheetTests.SpreadsheetTests.TestMethod44" -->
+        <!-- Badly formed XML comment ignored for member "M:SpreadsheetTests.SpreadsheetTests.TestMethod45" -->
+        <!-- Badly formed XML comment ignored for member "M:SpreadsheetTests.SpreadsheetTests.TestMethod46" -->
+        <!-- Badly formed XML comment ignored for member "M:SpreadsheetTests.SpreadsheetTests.TestMethod47" -->
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod48">
+            <summary>
+                Tries to save a file to a folder rather than a file (bad path name)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod49">
+            <summary>
+                Tries to construct a new spreadsheet using a bad path name
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod51">
+            <summary>
+                Tries to construct a new spreadsheet using a bad path name
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod52">
+            <summary>
+                Tries to construct a new spreadsheet using a bad path name
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod53">
+            <summary>
+                Tries to construct a new spreadsheet using a bad path name
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod54">
+            <summary>
+                Tries to construct a new spreadsheet using a bad path name
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod3">
+            <summary>
+                Tests GetCellValue, expects a string given a string.
+                Also tests SetContentsOfCell given a string.
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod4">
+            <summary>
+                Tests GetCellValue, expected a double given a double.
+                Also tests SetContentsOfCell given a double (as a string).
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod5">
+            <summary>
+                Tests GetCellValue, expects a double given a formula.
+                Also tests SetContentsOfCell given a formula (as a string).
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod6">
+            <summary>
+                Tests GetCellValue, expects a SpreadsheetUtilities.FormulaError given a formula.
+                Also tests SetContentsOfCell given a formula (as a string). 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod12">
+            <summary>
+                Tests GetCellValue, expects a SpreadsheetUtilities.FormulaError given a formula.
+                Also tests SetContentsOfCell given a formula (as a string). 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod13">
+            <summary>
+                Tests GetCellValue, expects an empty string. Also test 'Changed' for empty constructor
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod16">
+            <summary>
+                Tests the save method (see Output). Should write a file that looks like:
+                
+                <spreadsheet version="2.0">
+                 <cell>        
+                  <name>D1</name>
+                  <contents>1.0</contents>
+                 </cell>
+                 <cell>        
+                  <name>E1</name>
+                  <contents>1.0</contents>
+                 </cell>
+                 <cell>        
+                  <name>F1</name>
+                  <contents>3.0</contents>
+                 </cell>
+                 <cell>        
+                  <name>B1</name>
+                  <contents>=D1+E1</contents>
+                 </cell>
+                 <cell>        
+                  <name>C1</name>
+                  <contents>=F1</contents>
+                 </cell>
+                 <cell>        
+                  <name>A1</name>
+                  <contents>=B1+C1</contents>
+                 </cell>
+                </spreadsheet>
+                
+                Also tests the GetSavedVersion method. 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod21">
+            <summary>
+                Tests ability to save a file, then create a new spreadsheet using
+                the 4-argument constructor using the saved xml file.  We test for
+                equality between the original spreadsheet and one created using the 
+                saved xml file. This also tests the 'Changed' variable to determine 
+                if the spreadsheet has been changed or not. 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod50">
+            <summary>
+                Tests GetCellValue after changing and having to recalculate
+                cell values. 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod55">
+            <summary>
+                Tests the return value of SetContentsOfCell. Also tests whether
+                cells recalculate after having their dependee (D1) changed. 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod22">
+            <summary>
+            Tests null exception for all three SetCellContents methods (string)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod23">
+            <summary>
+            Tests null name exception for all three SetCellContents method (string)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod24">
+            <summary>
+            Tests invalid name exception for all three SetCellContents method (string)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod25">
+            <summary>
+            Tests null name exception for all three GetCellContents methods
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod26">
+            <summary>
+            Tests invalid name exception for all three GetCellContents methods
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod27">
+            <summary>
+            Tests null exception for all three SetCellContents methods (Formula)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod28">
+            <summary>
+            Tests null name exception for all three SetCellContents method (Formula)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod29">
+            <summary>
+            Tests invalid name exception for all three SetCellContents method (Formula)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod30">
+            <summary>
+            Tests null name exception for all three SetCellContents method (double)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod31">
+            <summary>
+            Tests invalid name exception for all three SetCellContents method (double)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod32">
+            <summary>
+            Tests null arg exception for GetDirectDependents
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod33">
+            <summary>
+            Tests null arg exception for GetDirectDependents 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod34">
+            <summary>
+            Tests for CircularException 
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod35">
+            <summary>
+            A more complex test for CircularException
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod36">
+            <summary>
+            Tests for GetDirectDependents
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod37">
+            <summary>
+            Tests for SetCellContents (Formula)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod38">
+            <summary>
+            Tests for SetCellContents (double)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod39">
+            <summary>
+            Tests for SetCellContents (string)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod40">
+            <summary>
+            Tests for GetCellContents
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod41">
+            <summary>
+            Tests for SetCellContents (Formula)
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod42">
+            <summary>
+            Tests for replacing contents of a cell
+            </summary>
+        </member>
+        <member name="M:SpreadsheetTests.SpreadsheetTests.TestMethod43">
+            <summary>
+            Tests for replacing contents of a cell
+            </summary>
+        </member>
+    </members>
+</doc>

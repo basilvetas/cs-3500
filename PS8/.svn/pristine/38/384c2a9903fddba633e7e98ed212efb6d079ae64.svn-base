@@ -1,0 +1,22 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using BoggleServer;
+
+namespace BoggleServerTest
+{
+    /// <summary>
+    /// Unit tests for our BoggleServer
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    [TestClass]
+    public class BoggleServerTest
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string[] args = {"a", "b", "c"};
+            BoggleServer.BoggleServer server = new BoggleServer.BoggleServer(args);        
+        }
+    }
+}

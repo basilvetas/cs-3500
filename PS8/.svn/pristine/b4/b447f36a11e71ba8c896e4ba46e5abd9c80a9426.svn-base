@@ -1,0 +1,317 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CustomNetworking;
+using System.Net.Sockets;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.IO;
+
+namespace BoggleServer
+{
+    /// <summary>
+    /// This program creates the server side of our Boggle game. Update
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    class BoggleServer
+    {
+        // Listens for incoming connections
+        private TcpListener server;
+
+        // One StringSocket per connected client
+        private List<StringSocket> allSockets;
+
+        // the name associated with the socket
+        private List<string> user_names;
+
+        // the number of seconds that each Boggle game should last (passed in as parameter)
+        private int gameLength;
+
+        // the path name of a file that contains all the legal words (passed in as parameter)
+        private HashSet<string> legalWords;
+
+        // optional string of exactly 16 letters used to initialize each Boggle board (optional parameter)
+        private string initialBoggleBoard;
+
+        /// <summary>
+        /// Will set up the Boggle Server
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            int parameters; // holds number of parameters we receive from console
+
+            // can only take 2 or 3 parameters
+            if (args.Length == 2)
+                parameters = 2;
+            else if (args.Length == 3)
+                parameters = 3;
+            else // otherwise return with error
+            {   
+                Console.Error.WriteLine("Invalid number of arguments.");
+                return;
+            }                
+
+            // variables for BoggleServer constructor
+            int timer;
+            string pathname;
+            string initBoard;
+
+            // if the first arg is an int, get it as our timer
+            if (int.TryParse(args[0], out timer)) 
+            {
+                if(!(timer > 0))    // if the time is not positive, return with error
+                {
+                    Console.Error.WriteLine("Invalid time argument. Must be positive.");
+                    return;
+                }
+            }
+            else // otherwise return with error
+            {
+                Console.Error.WriteLine("Invalid time argument. Must be a positive integer.");
+                return;                                 
+            }
+
+            // need to check if the file can be read properly
+            pathname = args[1];
+
+            // if there are three parameters, use it
+            if (parameters == 3)
+            {
+                if(args[2].Length != 16) // if the initial board is not 16 characters
+                {
+                    // return with error
+                    Console.Error.WriteLine("Initial Boggle board setup must have 16 characters.");
+                    return;
+                }
+
+                if (!(Regex.IsMatch(args[2], @"^[a-zA-Z]+$"))) // if it is not a letter
+                {
+                    // return with error
+                    Console.Error.WriteLine("Initial Boggle board can only be a letter a-z.");
+                    return;
+                }                
+
+                initBoard = args[2];
+            } 
+            else initBoard = null; // otherwise set it to null            
+
+            // create a new game server and read line
+            new BoggleServer(timer, pathname, initBoard);
+            Console.ReadLine();
+        }
+
+        /// <summary>
+        /// Create a Boggle Server. 
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="pathname"></param>
+        /// <param name="initBoard"></param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private BoggleServer(int timer, string pathname, string initBoard)
+        {
+            // initialize paramter variables
+            gameLength = timer;
+            string legalWordsFile = pathname;
+            initialBoggleBoard = initBoard;
+
+            // if the pathname is null or empty, return with error
+            if (ReferenceEquals(legalWordsFile, null) || legalWordsFile.Equals(""))
+            {
+                // return with error
+                Console.Error.WriteLine("Initial Boggle board can only be a letter a-z.");
+                return;
+            }
+            else legalWords = getLegalWords(legalWordsFile); // else read in legal words and store        
+                        
+            allSockets = new List<StringSocket>(); // will hold all the string sockets between clients
+            user_names = new List<string>();    // will hold names of all players
+
+            server = new TcpListener(IPAddress.Any, 2000); // create new server for boggle
+            server.Start(); // start the server
+
+            // begin accepting connections from players
+            server.BeginAcceptSocket(ReceivePlayerCallback, null); 
+        }
+
+        /// <summary>
+        /// Helper method to get the legal words for our Boggle game
+        /// </summary>
+        /// <param name="pathname"></param>
+        /// <returns></returns>
+        private HashSet<string> getLegalWords(string pathname)
+        {
+            HashSet<string> boggleWords = new HashSet<string>();
+
+            try // try to read in the dictionary file
+            {
+                using (StreamReader reader = new StreamReader(pathname))
+                {
+                    string word; // holds a legal word
+
+                    // while there is still another word in the file to read
+                    while (!(ReferenceEquals(word = reader.ReadLine(), null)))
+                    {
+                        boggleWords.Add(word);  // add it to our set of legal words
+                    }                   
+                }
+            }
+            catch(Exception e) // catch any exception
+            {
+                Console.WriteLine("The dictionary file could not be read: ");
+                Console.WriteLine(e.Message);
+            }
+
+            return boggleWords; // return list of legal words
+        }
+
+        /// <summary>
+        /// Deals with connection requests when a new player joins the Boggle game
+        /// </summary>
+        /// <param name="ar">Resulting status from asynchronous operation</param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void ReceivePlayerCallback(IAsyncResult ar)
+        {
+            // create a new socket using the received player connection
+            Socket socket = server.EndAcceptSocket(ar);
+
+            // wrap the socket in a string socket for the new player connection
+            StringSocket playerConnection = new StringSocket(socket, UTF8Encoding.Default);
+
+            // let the string socket begin accepting input to read the player name
+            playerConnection.BeginReceive(ReceiveNameCallback, playerConnection);
+
+            // let the server accept additional connections from new players
+            server.BeginAcceptSocket(ReceivePlayerCallback, null);
+        }
+
+        /// <summary>
+        /// Receives the first line of text from the client, which contains the name of the new
+        /// boggle player.  Uses it to compose and send back a welcome message.
+        /// 
+        /// Expects a "PLAY @" message after a new user has connected
+        /// 
+        /// Invariant: the object parameter will always be a String Socket
+        /// </summary>
+        /// <param name="name">The string input from player</param>
+        /// <param name="exception">A possible exception</param>
+        /// <param name="payload">A String Socket</param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void ReceiveNameCallback(String name, Exception exception, object payload)
+        {
+            StringSocket ss = (StringSocket) payload;  // invariant safe to cast as string socket
+
+            // If the reference is non-null, then there was a bad connection.
+            if (!ReferenceEquals(null, exception))
+            {
+                ss.BeginSend("IGNORING " + name, (e, o) => { }, ss);
+                return;
+            }
+
+            // If the name is null or empty, it is invalid
+            if (ReferenceEquals(null, name) || name.Equals(""))
+            {
+                return;
+            }
+
+            // If name doesn't start with PLAY, return
+            if (!(Regex.IsMatch(name, @"^PLAY")))
+            {
+                return;
+            }
+            
+            string playerName = ""; // use this to store proper PLAY @ name
+            // player class - create new player using playerName
+
+            // lock 
+            // then check if there is a player waiting, 
+                // if so, create a new game
+                // then start the game
+            // if not, put this player as the waiting player
+            // end lock
+
+            lock (allSockets)
+            {
+                allSockets.Add(ss);
+                user_names.Add(playerName);
+                ss.BeginSend(name + " welcome to Boggle!\n", (ee, pp) => { }, null);
+                ss.BeginReceive(IncomingCallback, ss);
+                // Question: how would you notify other clients of the new person joining?
+            }
+
+        }
+
+        // this stuff below would be done in the 'Game' class?
+
+        /// <summary>
+        /// Deals with lines of text as they arrive at the server.
+        /// </summary>
+        /// <param name="line"> Question: how would comment these parameters?</param>
+        /// <param name="e"></param>
+        /// <param name="ss"></param>
+        /// <citation>Chat Server from Lab Examples</citation>
+        private void IncomingCallback(String line, Exception e, object ss)
+        {
+            Console.WriteLine(line);
+            lock (allSockets)
+            {
+                // Question: what is better: foreach or for?
+                // foreach (StringSocket s in allSockets)
+                for (int i = 0; i < allSockets.Count; i++)
+                {
+                    allSockets[i].BeginSend(user_names[i] + ": " + line + "\r\n", (ex, py) => { }, null);
+                    // Question: why do we create an "empty" lambda function as the call back?
+                    // Question: why do we send \r\n
+                }
+            }
+            ((StringSocket)ss).BeginReceive(IncomingCallback, ss);
+        }
+
+        /// <summary>
+        /// Stop the Boggle server from accepting new player connections
+        /// </summary>
+        private void Stop()
+        {
+            // may need to dispose of resources here
+
+            // stop the server from accepting connections
+            server.Stop();
+        }
+    }
+
+    /// <summary>
+    /// A new Boggle player
+    /// </summary>
+    private class Player
+    {
+        private string name;
+        private StringSocket ss;
+
+        public int score {get; set;}
+
+        /// <summary>
+        /// Constructor for a new player
+        /// </summary>
+        public Player(string playerName, StringSocket connection)
+        {
+            // initialize variables
+            name = playerName;
+            ss = connection;
+            score = 0;
+        }
+    }
+
+    /// <summary>
+    /// A new Boggle game
+    /// </summary>
+    private class Game
+    {
+        public Game(Player playerOne, Player playerTwo, int gameLength, string initialBoardSetup, string legalWordsDictionary)
+        { 
+
+        }
+    }
+}

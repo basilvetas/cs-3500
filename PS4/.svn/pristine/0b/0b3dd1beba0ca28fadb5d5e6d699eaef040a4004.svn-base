@@ -1,0 +1,68 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SS;
+
+namespace SpreadsheetTests
+{
+    [TestClass]
+    public class SpreadsheetTests
+    {
+        /// <summary>
+        /// Tests null exception for all three SetCellContents methods
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod1()
+        {
+            String empty = null;
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("A1", empty);               
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three SetCellContents methods
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents(null, "");
+        }
+
+        /// <summary>
+        /// Tests invalid name exception for all three SetCellContents methods
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod3()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("4356", "");
+
+        }
+
+        /// <summary>
+        /// Tests null arg exception for GetDirectDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestMethod4()
+        {
+            PrivateObject accessor = new PrivateObject(new Spreadsheet());
+            accessor.Invoke("GetDirectDependents", new Object[] { null });
+
+        }
+
+        /// <summary>
+        /// Tests null arg exception for GetDirectDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod5()
+        {
+            PrivateObject accessor = new PrivateObject(new Spreadsheet());
+            accessor.Invoke("GetDirectDependents", new Object[] { "4353" });           
+        }
+    }
+}

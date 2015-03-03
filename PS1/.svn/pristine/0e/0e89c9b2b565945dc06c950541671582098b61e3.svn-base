@@ -1,0 +1,97 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace FormulaEvaluator
+{
+    /// <summary>
+    ///     A public static class for evaluating arithmetic expressions
+    /// </summary>
+    public static class Evaluator
+    {
+        /// <summary>
+        ///     Delegate Lookup function for variables in an arithmetic expression
+        /// </summary>
+        /// <param name="v">The name of the variable</param>
+        /// <returns>An integer value for the variable</returns>
+        public delegate int Lookup(String v);
+
+        /// <summary>
+        ///     Evaluates an arithmetic expression
+        /// </summary>
+        /// <param name="exp">The arithmetic expression to be evaluated</param>
+        /// <param name="variableEvaluator">A LookUp method passed in as a variable</param>
+        /// <returns>Returns an integer result</returns>
+        public static int Evaluate(String exp, Lookup variableEvaluator)
+        {
+
+            // Splits string into tokens in an array
+            string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+         
+            for(int i = 0; i < substrings.Length; i++)
+            {
+                //remove whitespace
+                String trimmed = substrings[i].Trim();
+                substrings[i] = trimmed;
+
+                Console.Write(substrings[i]);
+            }
+
+            Console.Read();
+
+
+            Stack<int> values = new Stack<int>();
+            Stack<String> operators = new Stack<String>();
+
+            for(int j = 0; j < substrings.Length; j++)
+            {
+                String t = substrings[j];
+
+                // is op
+                if(t.Equals("*") || t.Equals("/") || t.Equals("("))
+                {
+                    operators.Push(t);
+                }
+                else if(t.Equals("+") || t.Equals("-"))
+                {
+                    String top = operators.Peek();
+                    if(top.Equals("+") || top.Equals("-"))
+                    {
+                        int first_val = values.Pop();
+                        int second_val = values.Pop();
+                        String operation = operators.Pop();
+                        int result;
+                        if(operation.Equals("+"))                        
+                            result = first_val + second_val;                        
+                        else                       
+                            result = first_val - second_val;                        
+                        
+                        // operate on the two values and assign to result
+                        values.Push(result);
+                    }
+
+                    operators.Push(t);
+                }
+                // is val
+
+            }
+
+            double number;
+            if(Double.TryParse(result, out number))       
+                //int value = (int) number;
+           
+
+            
+            
+         
+            
+            // use Double.TryParse to convert string number to actual number value as a double
+
+            return 0;
+        }
+    }
+}

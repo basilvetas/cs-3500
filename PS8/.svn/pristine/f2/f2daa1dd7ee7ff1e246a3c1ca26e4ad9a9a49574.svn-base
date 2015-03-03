@@ -1,0 +1,6 @@
+﻿Authors: Basil Vetas and Lance Petersen
+Date: 11/22/14
+
+We decided to use the BoggleBoard class that was provided.
+
+What do we do if there are exceptions? (see ReceiveWordCallback and other callbacks)?

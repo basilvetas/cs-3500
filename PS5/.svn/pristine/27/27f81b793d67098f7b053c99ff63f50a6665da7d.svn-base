@@ -1,0 +1,56 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SS;
+using SpreadsheetUtilities;
+using System.Collections.Generic;
+
+namespace SpreadsheetTests
+{
+    /// <summary>
+    /// Test class for PS5. This class does not include any of the tests used in PS4. I assume
+    /// that the implementation of PS4 used in Spreadsheet passes 100% of the grading tests for PS4,
+    /// which is true because I have made all necessary corrections to my PS4 assignment. 
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>10-6-2014</date>
+    [TestClass]
+    public class SpreadsheetTests
+    {
+        // --------- Exception Tests ------------ //
+
+        /// <summary>
+        ///     Tests if cell name for GetCellValue is null
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod1()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.GetCellValue(null);
+        }
+
+        /// <summary>
+        ///     Tests if cell name for GetCellValue is invalid
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestMethod2()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            object value = sheet.GetCellValue("1$#*&%1");
+        }
+
+        // --------- Non-Exception Tests ------------ //
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestMethod]
+        public void TestMethod()
+        {
+
+        }
+      
+ 
+    }
+}

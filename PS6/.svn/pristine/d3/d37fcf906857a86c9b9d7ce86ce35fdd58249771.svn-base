@@ -1,0 +1,400 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Text.RegularExpressions;
+using SpreadsheetUtilities;
+using SS;
+
+namespace SpreadsheetGUI
+{
+    /// <summary>
+    /// This is a partial class for a spreadsheet Windows Forms Application
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>November 1, 2014</date>
+    public partial class SpreadsheetForm : Form
+    {
+        // Each spreadsheet form will contain a private spreadsheet object
+        private Spreadsheet spreadsheet;
+        // Keeps track of the location where the file is saved
+        private String fileName;
+
+        // helper variables so that user doesn't get asked to save changes twice
+        private bool passedFromClose;
+
+        /// <summary>
+        /// Constructor that creates a new spreadsheet form
+        /// </summary>
+        public SpreadsheetForm()
+        {
+            InitializeComponent();
+
+            // default constructor for a new spreadsheet 
+            spreadsheet = new Spreadsheet(IsValidName, s => s.ToUpper(), "ps6");
+
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+            fileName = null; // initialize to empty
+            passedFromClose = false;
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += NewSelection;
+        }
+
+        /// <summary>
+        /// Constructor that loads a spreadsheet form from a saved spreadsheet file
+        /// </summary>
+        /// <param name="filepath">Filepath where the spreadsheet is saved</param>
+        public SpreadsheetForm(String filepath)
+        {
+            InitializeComponent();            
+            
+            try // Try to load a spreadsheet from a file
+            {
+                spreadsheet = new Spreadsheet(filepath, IsValidName, s => s.ToUpper(), "ps6");
+            }
+            catch(SpreadsheetReadWriteException s)
+            {
+                MessageBox.Show(s.Message.ToString()); // display the message from the exception
+            }            
+
+            // when we run a new spreadsheet panel, update it with default data
+            UpdateSpreadsheet();
+            fileName = filepath; // initialize to the filepath where opened
+            passedFromClose = false;
+
+            // if the selected cell changes, update the display data
+            spreadsheetPanel1.SelectionChanged += NewSelection;
+        }
+
+        /// <summary>
+        /// Private helper method to check if the name of a cell is valid or not
+        /// </summary>
+        /// <param name="name"></param>
+        private Boolean IsValidName(String name)
+        {            
+            // if it is a valid cell name return true, else return false     
+            // this regex limits the cells to columns A-Z and rows 1-99
+            if (Regex.IsMatch(name, @"^[a-zA-Z][1-9][0-9]?$"))
+                return true;
+            else return false;
+        }
+        
+        /// <summary>
+        /// Helper method to get the name of the selected cell
+        /// </summary>
+        /// <returns>The name of the selected cell</returns>
+        private String GetCellName()
+        {            
+            // get the row and the column of selected cell from panel
+            int col, row;
+            spreadsheetPanel1.GetSelection(out col, out row);            
+            // for rows we want to start a 1 instead of 0 so add 1 to each term
+            int cellRow = ++row;
+            // since 'A' = 01000001 in binary, and col counts from 0 (0000), 1 (0001), 2 (0010)...
+            // then if we keep adding the next number to A the binary addition takes us from A-Z
+            char cellCol = (char)('A' + col);                        
+            return "" + cellCol + cellRow;            
+        }
+
+        /// <summary>
+        /// Helper method that updates the spreadsheet, including the text boxes that display
+        /// the cell name, value, and content, and also the cell value displayed in the cell itself
+        /// </summary>
+        private void UpdateSpreadsheet()
+        {
+            // get the name, content, and value of the current cell            
+            String cellName = GetCellName();
+            Object cellContents = spreadsheet.GetCellContents(cellName);
+            Object cellValue = spreadsheet.GetCellValue(cellName);
+
+            // set the contents of the textbox equal to that cell name            
+            cellNameBox.Text = cellName;
+
+            // if the cell content is a Formula, add the '=' back on
+            if (spreadsheet.GetCellContents(cellName) is Formula)
+                cellContentsBox.Text = "=" + cellContents.ToString();
+            else // otherwise just set the textbox equal to the content
+                cellContentsBox.Text = cellContents.ToString();
+
+            // check if the cell value is a formula error, say so
+            if (spreadsheet.GetCellValue(cellName) is FormulaError)
+                cellValueBox.Text = "Formula Error";
+            else // otherwise just set the textbox equal to the value
+                cellValueBox.Text = cellValue.ToString();                           
+        }
+
+        /// <summary>
+        /// This is a helper method that will update the spreadsheet when a new cell is selected
+        /// </summary>
+        /// <param name="ss"></param>
+        /// <citation>Referenced from PS6 Skeleton 'Demo' class</citation>
+        private void NewSelection(SpreadsheetPanel ss)
+        {
+            UpdateSpreadsheet();       
+        }
+
+        /// <summary>
+        /// This is a helper method that will evaluate a cell's value after the 'Evaluate' button 
+        /// is pressed and content has been added to the formula textbox. 
+        /// </summary>
+        /// <param name="e">the event</param>
+        /// <param name="sender">default</param>
+        private void evaluateButton_Click(object sender, EventArgs e)
+        {
+            ISet<String> dependents = null; // will hold dependents of selected cell
+
+            try
+            {
+                // try to add the cell name and cell content as a new cell in the spreadsheet
+                // if it works, save the returned list of dependents
+                dependents = spreadsheet.SetContentsOfCell(cellNameBox.Text, cellContentsBox.Text);            
+            }
+            catch(FormulaFormatException) 
+            {
+                // if exception is caught, print message
+                MessageBox.Show("Error: You have entered an invalid formula. Your changes will"
+                + " be reverted and the formula will not be saved.");                
+            }  
+            catch(CircularException)
+            {
+                // if exception is caught, print message
+                MessageBox.Show("Error: A circular reference occurred. Some change you have made" 
+                    + " to the currently selected cell was invalid. All changes will be reverted.");                                
+            }
+
+            // update at the end before ending method
+            UpdateSpreadsheet();     
+            
+            // need to deal with what happens if the evaluate creates a formula error and another 
+            // cell references that formula error
+
+            
+            // ********** This part isn't working correctly all the way since there are unhandled exceptions:
+            // ********** See README.txt for exceptions that need to be handled
+
+            // if dependents is null (meaning an exception was thrown above), or if the currently
+            // selected cells value is a Formula error, then we don't want to update dependents so return
+            if ((ReferenceEquals(dependents, null)) || (spreadsheet.GetCellValue(GetCellName()) is FormulaError))
+                return;                    
+
+            // for each cell in dependents, update it
+            foreach (string d in dependents)
+                UpdateCell(d);
+        }
+
+        /// <summary>
+        /// Helper method so that we can press 'return' or 'enter' and it will operate
+        /// like we have pressed the evaluate button
+        /// </summary>
+        /// <param name="sender">default</param>
+        /// <param name="e">the key event</param>
+        private void cellContentsBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // if the key that was pressed is the return key "\r"
+            if (e.KeyChar.Equals('\r')) // then evaluate the formula box
+                evaluateButton_Click(sender, e);    
+        }
+
+        /// <summary>
+        /// Helper method that will update cell dependents when their parent cell gets changed.
+        /// This method updates the actual cells in the spreadsheet to display the correct values. 
+        /// </summary>
+        /// <param name="cellName">The name of the cell to update</param>
+        private void UpdateCell(string cellName)
+        {
+            // data needed to update cell
+            int cellColIndex;
+            int cellRowIndex;
+            string cellValue;
+
+            // get the column letter and convert it to the numerical index
+            cellColIndex = cellName.ToCharArray(0,1)[0] - 'A';
+
+            // parse the remainder of the string as an int in order to 
+            // get the row number and convert it to the numberical index            
+            int.TryParse(cellName.Substring(1), out cellRowIndex);
+            cellRowIndex--;
+
+            // check if the cells value is a formula error, if it is say so
+            if (spreadsheet.GetCellValue(cellName) is FormulaError)
+                cellValue = "Formula Error";
+            else // otherwise, set cellValue to the cell's value 
+                cellValue = spreadsheet.GetCellValue(cellName).ToString();
+
+            // update the value of the cell
+            spreadsheetPanel1.SetValue(cellColIndex, cellRowIndex, cellValue);
+        }
+
+        /// <summary>
+        /// This method is run when the 'New' button is clicked.  The method opens
+        /// a new spreadsheet panel in a new window. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <citation>Referenced from PS6 Skeleton 'Demo' class</citation>
+        private void newMenuItem_Click(object sender, EventArgs e)
+        {
+            SpreadsheetApplicationContext.getAppContext().RunForm(new SpreadsheetForm());
+        }
+        
+        /// <summary>
+        /// This method is run when the 'Open' button is clicked.  The method opens
+        /// a saved spreadsheet from a file.        
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void openMenuItem_Click(object sender, EventArgs e)
+        {
+            // Referenced MSDN library for Filter syntax
+            openFileDialog1.Filter = "Spreadsheet Files (*.sprd)|*.sprd|All Files (*.*)|*.*";
+            openFileDialog1.DefaultExt = ".sprd";
+            openFileDialog1.FileName = "";
+            openFileDialog1.ShowDialog();            
+
+            // get the name of the selected file
+            string filename = openFileDialog1.FileName;
+
+            // if the file name is empty, give a message and return
+            if (filename == "")
+                return;
+                
+            // if the user selected option 1 (needs to be .sprd) then if the selected
+            // filename does not end with .sprd, tell it to add the default extension
+            if(openFileDialog1.FilterIndex == 1)
+                openFileDialog1.AddExtension = true;          
+           
+            // Create a new form with the selected filename and run it
+            SpreadsheetForm newForm = new SpreadsheetForm(filename);                
+            SpreadsheetApplicationContext.getAppContext().RunForm(newForm);
+
+            // Update each cell in the GUI to show the values in the spreadsheet
+            foreach(string s in newForm.spreadsheet.GetNamesOfAllNonemptyCells())
+                newForm.UpdateCell(s);            
+        }
+
+        /// <summary>
+        /// This method is run when the 'Save' button is clicked.  The method saves a
+        /// spreadsheet to a specified filepath.     
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void saveMenuItem_Click(object sender, EventArgs e)
+        {
+            if(ReferenceEquals(fileName, null)) // If no file name has been specificed
+            {
+                // Make the user choose a file name
+                saveFileDialog1.Filter = "Spreadsheet Files (*.sprd)|*.sprd|All Files (*.*)|*.*";
+                saveFileDialog1.DefaultExt = ".sprd";                
+                saveFileDialog1.ShowDialog();
+
+                // get the name of the selected file
+                string savename = saveFileDialog1.FileName;
+
+                // if the file name is empty, give a message and return
+                if (savename == "")                    
+                    return;  
+
+                // if the user selected option 1 (needs to be .sprd) then if the selected
+                // filename does not end with .sprd, append it to the end
+                if (saveFileDialog1.FilterIndex == 1)
+                    saveFileDialog1.AddExtension = true;        
+
+                // once we have a proper file name, save the spreadsheet to that file
+                spreadsheet.Save(savename);
+                fileName = savename; // set fileName to where we saved the spreadsheet
+            }
+
+            // If the spreadsheet has been changed then save it
+            if(spreadsheet.Changed) 
+            {                
+                spreadsheet.Save(fileName);
+            } 
+            
+            // if not, do nothing
+        }
+
+        /// <summary>
+        /// This method is run when the 'Close' button is clicked. If changes have been made
+        /// it prompts the user with the option to save their changes.    
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void closeMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(spreadsheet.Changed)) // If no changes have been made just close the file
+                Close();
+            else
+            {   // referenced StackOverflow for DialogResult syntax
+                DialogResult result = MessageBox.Show("Your spreadsheet has unsaved changes. Would you like to " +
+                    "save your changes before closing?", "Save Before Exiting?", MessageBoxButtons.YesNoCancel);
+
+                // if 'Yes' then save the file
+                if (result == DialogResult.Yes)
+                    saveMenuItem.PerformClick(); // call the save method                     
+                else if (result == DialogResult.No)
+                {
+                    passedFromClose = true;
+                    Close(); // if 'No' then just close                                
+                }
+                    
+
+                // otherwise they selected 'Cancel' so do nothing
+            }   
+        }
+
+        /// <summary>
+        /// This method addresses the case when a user clicks the red X in the top right
+        /// of the form to close it. Prompts user with save option if changes have been made.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SpreadsheetForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(spreadsheet.Changed & !passedFromClose)
+            {   // referenced StackOverflow for DialogResult syntax
+                DialogResult result = MessageBox.Show("Your spreadsheet has unsaved changes. Would you like to " +
+                    "save your changes before closing?", "Save Before Exiting?", MessageBoxButtons.YesNoCancel);
+
+                // if 'Yes' then save the file
+                if (result == DialogResult.Yes)
+                    saveMenuItem.PerformClick(); // call the save method                                     
+
+                // otherwise let the program close
+            }  
+        }
+
+        private void spreadsheetPanel1_KeyDown(object sender, KeyEventArgs e)
+        {            
+            switch(e.KeyData)
+            {
+                case Keys.Left:
+                    MessageBox.Show("Left");
+                    break;
+                case Keys.Right:
+                    MessageBox.Show("Right");
+                    break;
+                case Keys.Up:
+                    MessageBox.Show("Up");
+                    break;
+                case Keys.Down:
+                    MessageBox.Show("Down");
+                    break;
+            }
+        }
+
+        
+                              
+        // close spreadsheet
+        // help
+        
+
+
+    }
+}

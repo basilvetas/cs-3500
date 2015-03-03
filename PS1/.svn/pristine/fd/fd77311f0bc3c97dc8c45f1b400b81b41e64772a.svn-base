@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace FormulaEvaluator
+{
+    /// <summary>
+    ///     A public static class for evaluating arithmetic expressions
+    /// </summary>
+    public static class Evaluator
+    {
+        /// <summary>
+        ///     Delegate Lookup function for variables in an arithmetic expression
+        /// </summary>
+        /// <param name="v">The name of the variable</param>
+        /// <returns>An integer value for the variable</returns>
+        public delegate int Lookup(String v);
+
+        /// <summary>
+        ///     Evaluates an arithmetic expression
+        /// </summary>
+        /// <param name="exp">The arithmetic expression to be evaluated</param>
+        /// <param name="variableEvaluator">A LookUp method passed in as a variable</param>
+        /// <returns>Returns an integer result</returns>
+        public static int Evaluate(String exp, Lookup variableEvaluator)
+        {
+
+            // Splits string into tokens in an array
+            string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+
+            Stack values = new Stack();
+            Stack operators = new Stack();
+            
+            return 0;
+        }
+    }
+}

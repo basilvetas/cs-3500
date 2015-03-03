@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BoggleServer</name>
+    </assembly>
+    <members>
+        <member name="T:BoggleServer.BoggleServer">
+            <summary>
+            This program creates the server side of our Boggle game.
+            </summary>
+            <author>Basil Vetas, Lance Petersen</author>
+            <date>November 18, 2014</date>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.Main(System.String[])">
+            <summary>
+            Will set up the Boggle Server
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.#ctor(System.String[])">
+            <summary>
+            Public constructor to check the arguments that are passed in and create a new
+            BoggleServer based on the given arguments by calling a private constructor. 
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getLegalWords(System.String)">
+            <summary>
+            Helper method to get the legal words for our Boggle game
+            </summary>
+            <param name="pathname"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.ReceivePlayerCallback(System.IAsyncResult)">
+            <summary>
+            Deals with connection requests when a new player joins the Boggle game
+            </summary>
+            <param name="ar">Resulting status from asynchronous operation</param>
+            <citation>Chat Server from Lab Examples</citation>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.ReceiveNameCallback(System.String,System.Exception,System.Object)">
+            <summary>
+            Receives the first line of text from the client, which contains the name of the new
+            boggle player.  Uses it to compose and send back a welcome message.
+            
+            Expects a "PLAY @" message after a new user has connected
+            
+            Invariant: the object parameter will always be a String Socket
+            </summary>
+            <param name="name">The string input from player</param>
+            <param name="exception">A possible exception</param>
+            <param name="payload">A String Socket</param>
+            <citation>Chat Server from Lab Examples</citation>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.Stop">
+            <summary>
+            Stop the Boggle server from accepting new player connections
+            </summary>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getNextPlayerID">
+            <summary>
+            queries database for next available player id
+            </summary>
+            <returns>next player id</returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getNextGameID">
+            <summary>
+            queries database for next available game id
+            </summary>
+            <returns>next game id</returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.WebRequestCallback(System.IAsyncResult)">
+            <summary>
+            Callback for requests to web server for game results
+            </summary>
+            <param name="ar"></param>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.WebMessageCallback(System.String,System.Exception,System.Object)">
+            <summary>
+            Callback for when the web client sends a message through the string socket
+            
+            Invariant: payload will always be the string socket that triggered the callback
+            </summary>
+            <param name="name"></param>
+            <param name="exception"></param>
+            <param name="payload"></param>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getPlayersHTML">
+            <summary>
+            Helper method to get All Players HTML page
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getGamesHTML(System.String)">
+            <summary>
+            Helper method to get Single Player Games HTML page
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getGameHTML(System.String)">
+            <summary>
+            Helper method to get Single Game HTML page
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.getErrorHTML">
+            <summary>
+            Helper method to get Error HTML page
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.BoggleServer.addCSS">
+            <summary>
+            Helper method to add CSS style to html pages above
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:BoggleServer.Player">
+            <summary>
+            A new Boggle player
+            </summary>
+        </member>
+        <member name="M:BoggleServer.Player.#ctor(System.String,CustomNetworking.StringSocket,System.Int32)">
+            <summary>
+            Constructor for a new player
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.name">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.ss">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.score">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.legalWordsFound">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.illegalWordsFound">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Player.ID">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:BoggleServer.Game">
+            <summary>
+            A new Boggle game
+            </summary>
+        </member>
+        <member name="F:BoggleServer.Game.connectionString">
+            <summary>
+            The string used to connect to the database
+            </summary>
+        </member>
+        <member name="M:BoggleServer.Game.#ctor(BoggleServer.Player,BoggleServer.Player,System.Int32,System.String,System.Collections.Generic.HashSet{System.String},System.Int32)">
+            <summary>
+            Constructor for a new game of boggle
+            </summary>
+            <param name="playerOne"></param>
+            <param name="playerTwo"></param>
+            <param name="gameLength"></param>
+            <param name="initialBoardSetup"></param>
+            <param name="legalWordsDictionary"></param>
+        </member>
+        <member name="M:BoggleServer.Game.OnTimedEvent(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            Every time 1 second has elapses, decrement the timeRemaining and 
+            send the time to both clients.
+            </summary>
+            <param name="source"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:BoggleServer.Game.Start">
+            <summary>
+            Starts the game of Boggle
+            </summary>
+        </member>
+        <member name="M:BoggleServer.Game.playGame">
+            <summary>
+            The actual gameplay for a Boggle game
+            </summary>
+        </member>
+        <member name="M:BoggleServer.Game.receiveWordsCallback(System.String,System.Exception,System.Object)">
+            <summary>
+            Callback for when a player finds a word (or thinks they have found a word)
+            
+            Invariant: the third parameter should always be a Player object
+            </summary>
+            <param name="word">The word found</param>
+            <param name="exception">Possible exception</param>
+            <param name="payload">The player who found the word</param>
+        </member>
+        <member name="M:BoggleServer.Game.updateScore(System.String,BoggleServer.Player,BoggleServer.Player)">
+            <summary>
+            Helper method to update the score when a player finds a word
+            
+            Invariant: The second paramter should always be the player who found the word
+            and the third parameter should always be the opponent 
+            </summary>
+            <param name="word">The word found</param>
+            <param name="playerFoundWord">Player who found it</param>
+            <param name="opponent">Opponent player</param>
+        </member>
+        <member name="M:BoggleServer.Game.getValue(System.String)">
+            <summary>
+            Helper method to get the point value of a found word.
+            
+            Invariant: word will never be less than 3 characters
+            </summary>
+            <param name="word"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.Game.MakeGameSummary(BoggleServer.Player,BoggleServer.Player)">
+            <summary>
+            Generate a summary of the game for the player specified.
+            Add the outcome of the game to a database. 
+            </summary>
+            <param name="player"></param>
+            <param name="opponent"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BoggleServer.Game.updateDatabase(BoggleServer.Player,BoggleServer.Player,System.Int32,System.String)">
+            <summary>
+            Adds the summary information to the database
+            </summary>
+            <param name="playerOne"></param>
+            <param name="playerTwo"></param>
+            <param name="?"></param>
+            <param name="gameLength"></param>
+            <param name="board"></param>
+        </member>
+        <member name="M:BoggleServer.Game.updatePlayerInformation(System.Int32,System.String)">
+            <summary>
+            helper method to update PlayerInformation table (adds data for a single player)
+            </summary>
+            <param name="playerID"></param>
+            <param name="playerName"></param>
+            <returns>true if the update was successful, false if not</returns>
+        </member>
+        <member name="M:BoggleServer.Game.updateGameResults(System.Int32,System.Int32,System.Int32,System.String,System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            helper method to update GameResults table (adds data from a single game)
+            </summary>
+            <param name="board"></param>
+            <param name="dateTime"></param>
+            <param name="gameID"></param>
+            <param name="playerOneID"></param>
+            <param name="playerTwoID"></param>
+            <param name="scoreOne"></param>
+            <param name="scoreTwo"></param>
+            <param name="timeLimit"></param>
+            <returns>true if the update was successful, false if not</returns>
+        </member>
+        <member name="M:BoggleServer.Game.updateWordsPlayed(System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            helper method to update WordsPlayed table (only updates a single word found in a game)
+            
+            Invariant: the fourth parameter should always be either equal to 1 (true) or 0 (false)
+            </summary>
+            <param name="gameID"></param>
+            <param name="isLegal"></param>
+            <param name="playerID"></param>
+            <param name="word"></param>
+            <returns>true if the update was successful, false if not</returns>
+        </member>
+        <member name="P:BoggleServer.Game.ID">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BoggleServer.Game.gameLength">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:BB.BoggleBoard">
+            <summary>
+            Represents a Boggle board. 
+            </summary>
+        </member>
+        <member name="M:BB.BoggleBoard.#ctor">
+            <summary>
+            Creates a randomly-generated BoggleBoard 
+            </summary>
+        </member>
+        <member name="M:BB.BoggleBoard.#ctor(System.String)">
+            <summary>
+            Creates a BoggleBoard from the provided 16-letter string.  The
+            method is case-insensitive.  If there aren't exactly 16 letters
+            in the string, throws an ArgumentException.  The string consists
+            of the first row, then the second row, then the third, then the fourth.
+            </summary>
+        </member>
+        <member name="M:BB.BoggleBoard.MakeBoard(System.String)">
+            <summary>
+            Makes a board from the 16-letter string
+            </summary>
+        </member>
+        <member name="M:BB.BoggleBoard.ToString">
+            <summary>
+            Returns the 16 letters that make up this board.  It is formed
+            by appending the first row to the second row to the third row
+            to the fourth row.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BB.BoggleBoard.CanBeFormed(System.String)">
+            <summary>
+            Reports whether the provided word can be formed by tracking through
+            this Boggle board as described in the rules of Boggle.  The method
+            is case-insensitive.
+            </summary>
+        </member>
+        <member name="M:BB.BoggleBoard.CanBeFormed(System.String,System.Int32,System.Int32,System.Boolean[0:,0:])">
+            <summary>
+            Reports whether the provided word can be formed by tracking through
+            this Boggle board by beginning at location [i,j] and avoiding any
+            squares marked as visited.
+            </summary>
+        </member>
+    </members>
+</doc>

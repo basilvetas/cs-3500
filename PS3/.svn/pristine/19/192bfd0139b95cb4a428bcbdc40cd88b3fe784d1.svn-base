@@ -1,0 +1,129 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SpreadsheetUtilities;
+
+namespace FormulaTester
+{
+    /// <summary>
+    /// Comment 
+    ///
+    /// </summary>
+    /// <author>Basil Vetas</author>
+    /// <date>September 23rd 2014</date>
+    [TestClass()]
+    public class FormulaTester
+    {
+
+        // --------------------- Tests ------------------------- //
+
+        /// <summary>
+        /// This test evaluates whether the Formula class returns 2.0 when given 1 + 1
+        /// </summary>
+        [TestMethod()]
+        public void Test1()
+        {
+            Formula formula_tester = new Formula("1 + 1");
+            object result = formula_tester.Evaluate(null);            
+            Assert.AreEqual(2.0, result); 
+
+            //System.Diagnostics.Debug.WriteLine("Hello");
+        }
+
+        /// <summary>
+        /// Tests that a simple formula with variables works. Also checks that
+        /// the loopup delegate is implemented properly. 
+        /// </summary>
+        [TestMethod()]
+        public void Test2()
+        {
+            Formula formula_tester = new Formula("A1 + a1");
+            object result = formula_tester.Evaluate(x => 1);
+            Assert.AreEqual(2.0, result); 
+        }
+
+        /// <summary>
+        /// Tests the ToString method and also that the normalizer works
+        /// </summary>
+        [TestMethod()]
+        public void Test3()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => x.ToUpper(), x => true);
+            string formula = formula_tester.ToString();
+            Assert.AreEqual("A1+A1", formula); 
+        }
+
+        /// <summary>
+        /// Tests GetHashCode method
+        /// </summary>
+        [TestMethod()]
+        public void Test4()
+        {
+            Formula formula_tester = new Formula("A1 + a1");
+            string hash = "A1+a1";
+            int code = hash.GetHashCode();
+            int formula_code = formula_tester.GetHashCode();
+            Assert.AreEqual(code, formula_code); 
+        }
+
+        /// <summary>
+        /// Tests GetHashCode method with normalize function
+        /// </summary>
+        [TestMethod()]
+        public void Test5()
+        {
+            Formula formula_tester = new Formula("A1 + a1", x => x.ToUpper(), x => true);
+            string hash = "A1+A1";
+            int code = hash.GetHashCode();
+            int formula_code = formula_tester.GetHashCode();
+            Assert.AreEqual(code, formula_code); 
+        }
+
+        // ----------------- Exception Handling Tests -------------------- //
+
+        // I may want to return a FormatError struct for these cases
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the single parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest7()
+        {
+            Formula invalid = new Formula("111AAA");
+        }
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the three parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        public void EmptyTest8()
+        {
+            Formula invalid = new Formula("111AAA", null, null);
+        }
+
+        // will need to create more invalid format tests for all the
+        // possibly ways that a format can be invalid and make sure to
+        // test them for both the single and 3 parameter constructors. 
+        // Unless I can just create a helper method to check for format
+        // which both constructors can call to check it.  Then I only need to
+        // test one of the constructors. 
+
+        // ----------------- Non-Empty Formula Format Tests -------------------- //
+
+
+        /// <summary>
+        /// This test evaluates if the Formula class correctly throws a
+        /// FormulaFormatException for the three parameter constructor.
+        /// </summary>
+        [TestMethod()]
+        //[ExpectedException(FormulaFormatException)]
+        public void EmptyTest9()
+        {
+            Formula parens = new Formula("(1 + 1) - 2)");
+            // should throw an exception
+
+        }
+
+    }
+}

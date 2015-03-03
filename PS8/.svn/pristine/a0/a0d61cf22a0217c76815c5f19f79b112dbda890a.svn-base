@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BoggleServer
+{
+    /// <summary>
+    /// This program creates the server side of our Boggle game. Update
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    class BoggleServer
+    {
+        static void Main(string[] args)
+        {
+            
+        }
+    }
+}

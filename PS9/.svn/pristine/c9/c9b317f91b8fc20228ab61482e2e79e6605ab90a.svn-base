@@ -1,0 +1,128 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace BC
+{
+    /// <summary>
+    /// Interaction logic for HomePage.xaml
+    /// </summary>
+    public partial class HomePage : Page
+    {
+        /// <summary>
+        /// model to allow this page to interact with data (passed in as a parameter)
+        /// </summary>
+        private BoggleClientModel model;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HomePage(BoggleClientModel model)
+        {
+            InitializeComponent();
+            this.model = model;
+
+            model.StartLineEvent += StartReceived;
+            model.ConnectionEvent += ConnectionReceived;
+        }
+
+        /// <summary>
+        /// Makes it so that the user can type in immediately after clicking.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EnterIPAddr_GotFocus(object sender, RoutedEventArgs e)
+        {
+            EnterIPAddr.Text = "";
+        }
+
+        /// <summary>
+        /// Makes it so that the user can type in immediately after clicking.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EnterPlayerName_GotFocus(object sender, RoutedEventArgs e)
+        {
+            EnterPlayerName.Text = "";
+        }
+
+        /// <summary>
+        /// Send the data to the server and switch pages.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            // When the start button is clicked, try to connect to a
+            // boggleServer using the provided IP Address, if this fails
+            // if will send a ConnectionEvent that closes the view/ client
+            // if it is successful, it will call a helper method to send the
+            // player's name and wait for another opponent to join the server
+            model.Connect(EnterIPAddr.Text);            
+        }
+
+        /// <summary>
+        /// Helper method called once a connection is successfully made
+        /// </summary>
+        private void WaitToBeginGame()
+        {
+            // If we are able to connect, then send the player name to the server 
+            model.SendPlayerName(EnterPlayerName.Text);
+
+            WaitingMessage.Visibility = System.Windows.Visibility.Visible;
+
+            //Debugging! This is only here temporarily for testing purposes
+            // until we can have a second player join (then this function will be
+            // called through the StartReceived method below)
+            this.NavigationService.Navigate(new GamePage(model));
+        }
+
+        /// <summary>
+        /// Once the game starts, transition to the GamePage.
+        /// </summary>
+        /// <param name="line"></param>
+        private void StartReceived(String line)
+        {
+            // get each word, split by white spaces
+            string[] words = Regex.Split(line, @"[\s]+");
+            
+            // sets the variables in the model
+            model.setBoard(words[0]);
+            model.setTime(words[1]);
+            model.setOpponent(words[2]);
+            
+            this.NavigationService.Navigate(new GamePage(model));
+        }
+
+        /// <summary>
+        /// Event checks if a connection is successful
+        /// </summary>
+        /// <param name="connected"></param>
+        private void ConnectionReceived(bool connected)
+        {
+            // need to do stuff in here to check if connection is true or falst
+
+            // if the connection fails, disconnect the client
+            //if (connected == false)
+                //return;
+                // close the window;
+
+            // if the connection was successful, wait for another
+            // player to join so client can begin the game
+            //if(connected == true)
+            WaitToBeginGame();
+        }
+    }
+}

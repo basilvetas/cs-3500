@@ -1,0 +1,206 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SpreadsheetGUI</name>
+    </assembly>
+    <members>
+        <member name="T:SpreadsheetGUI.SpreadsheetForm">
+            <summary>
+            This is a partial class for a spreadsheet Windows Forms Application
+            </summary>
+            <author>Basil Vetas</author>
+            <date>November 1, 2014</date>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.#ctor">
+            <summary>
+            Constructor that creates a new spreadsheet form
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.IsValidName(System.String)">
+            <summary>
+            Private helper method to check if the name of a cell is valid or not
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.GetCellName">
+            <summary>
+            Helper method to get the name of the selected cell
+            </summary>
+            <returns>The name of the selected cell</returns>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.UpdateSpreadsheet">
+            <summary>
+            Helper method that updates the spreadsheet, including the text boxes that display
+            the cell name, value, and content, and also the cell value displayed in the cell itself
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.NewSelection(SS.SpreadsheetPanel)">
+            <summary>
+            This is a helper method that will update the spreadsheet when a new cell is selected
+            </summary>
+            <param name="ss"></param>
+            <citation>Referenced from PS6 Skeleton 'Demo' class</citation>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.evaluateButton_Click(System.Object,System.EventArgs)">
+            <summary>
+            This is a helper method that will evaluate a cell's value after the 'Evaluate' button 
+            is pressed and content has been added to the formula textbox. 
+            </summary>
+            <param name="e">the event</param>
+            <param name="sender">default</param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.cellContentsBox_KeyPress(System.Object,System.Windows.Forms.KeyPressEventArgs)">
+            <summary>
+            Helper method so that we can press 'return' or 'enter' and it will operate
+            like we have pressed the evaluate button
+            </summary>
+            <param name="sender">default</param>
+            <param name="e">the key event</param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.UpdateCell(System.String)">
+            <summary>
+            Helper method that will update cell dependents when their parent cell gets changed.
+            This method first clears all the cells in the spreadsheet (needed for the case when
+            we open a spreadsheet to overwrite the current one), and then it updates the actual 
+            cells in the spreadsheet to display the correct values. 
+            </summary> 
+            <param name="cellName">The name of the cell to update</param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.GetColIndex(System.String)">
+            <summary>
+            Private helper method to get the column index of a cell name
+            </summary>
+            <param name="cellName"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.GetRowIndex(System.String)">
+            <summary>
+            Private helper method to get the row index of a cell name
+            </summary>
+            <param name="cellName"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.newMenuItem_Click(System.Object,System.EventArgs)">
+            <summary>
+            This method is run when the 'New' button is clicked.  The method opens
+            a new spreadsheet panel in a new window. 
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+            <citation>Referenced from PS6 Skeleton 'Demo' class</citation>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.openMenuItem_Click(System.Object,System.EventArgs)">
+            <summary>
+            This method is run when the 'Open' button is clicked.  The method opens
+            a saved spreadsheet from a file.        
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.saveMenuItem_Click(System.Object,System.EventArgs)">
+            <summary>
+            This method is run when the 'Save' button is clicked.  The method saves a
+            spreadsheet to a specified filepath.     
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.saveAsToolStripMenuItem_Click(System.Object,System.EventArgs)">
+            <summary>
+            Allows the user to Save As for a file and change the name and location of where
+            it is saved. 
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.closeMenuItem_Click(System.Object,System.EventArgs)">
+            <summary>
+            This method is run when the 'Close' button is clicked. If changes have been made
+            it prompts the user with the option to save their changes.    
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.SpreadsheetForm_FormClosing(System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            This method addresses the case when a user clicks the red X in the top right
+            of the form to close it. Prompts user with save option if changes have been made.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.helpMenu_Click(System.Object,System.EventArgs)">
+            <summary>
+            Displays a message when user clicks on the 'Help' button
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="F:SpreadsheetGUI.SpreadsheetForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:SpreadsheetGUI.SpreadsheetApplicationContext">
+            <summary>
+            Keeps track of how many top-level forms are running
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetApplicationContext.#ctor">
+            <summary>
+            Private constructor for singleton pattern
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetApplicationContext.getAppContext">
+            <summary>
+            Returns the one DemoApplicationContext.
+            </summary>
+        </member>
+        <member name="M:SpreadsheetGUI.SpreadsheetApplicationContext.RunForm(System.Windows.Forms.Form)">
+            <summary>
+            Runs the form
+            </summary>
+            <param name="form">The form to be run</param>
+        </member>
+        <member name="T:SpreadsheetGUI.Program">
+            <summary>
+            This class uses the code from "Program.cs" file in the PS6Skeleton 
+            to allow the spreadsheet to keep track of multiple windows.
+            </summary>
+            <author>Basil Vetas</author>
+            <date>November 1, 2014</date>
+            <citation>PS6Skeleton 'Program' class</citation>
+        </member>
+        <member name="M:SpreadsheetGUI.Program.Main">
+            <summary>
+            The main entry point for the application.
+            </summary>
+        </member>
+        <member name="T:SpreadsheetGUI.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:SpreadsheetGUI.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:SpreadsheetGUI.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+    </members>
+</doc>

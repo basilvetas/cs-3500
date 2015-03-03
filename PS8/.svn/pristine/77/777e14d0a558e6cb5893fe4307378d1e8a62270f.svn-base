@@ -1,0 +1,20 @@
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace BoggleServerTest
+{
+    /// <summary>
+    /// Unit tests for our BoggleServer
+    /// </summary>
+    /// <author>Basil Vetas, Lance Petersen</author>
+    /// <date>November 18, 2014</date>
+    [TestClass]
+    public class BoggleServerTest
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            BoggleServer server = new BoggleServer();
+        }
+    }
+}
